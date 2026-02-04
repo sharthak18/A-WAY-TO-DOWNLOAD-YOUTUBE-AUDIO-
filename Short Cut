@@ -48,3 +48,31 @@ yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%%(title)s.%%(
 echo Done! check your folder.
 pause
 How to use it: Now, you just double-click Download_Music.bat, paste your link, and hit Enter. It does everything for you.
+
+
+Here is the code for your Download_Video.bat file.
+
+How to create it:
+Open Notepad.
+
+Paste the code below.
+
+Save it as Download_Video.bat (Make sure to save it in your youtube-dl folder).
+
+Code snippet
+@echo off
+:: Ask for the link
+set /p url="Paste YouTube Video Link: "
+
+:: Download Best Video+Audio and merge into MP4
+echo Downloading Best Quality Video (MP4)...
+yt-dlp -f "bv+ba/b" --merge-output-format mp4 --add-metadata --embed-thumbnail -o "%%(title)s.%%(ext)s" "%url%"
+
+echo.
+echo ---------------------------------------------------
+echo Done! The video is ready.
+echo ---------------------------------------------------
+pause
+Note: I added --embed-thumbnail to this one too, so your video files on your computer will show the actual video thumbnail instead of a random frame!
+
+Enjoy your collection!
