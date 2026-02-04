@@ -79,8 +79,10 @@ Add Metadata (Artist/Song info) so your car/phone display reads it correctly.
 
 Copy and paste this command:
 
-DOS
+DOS :
 yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%(title)s.%(ext)s" https://youtu.be/WECKJ1VzCVA
+
+
 What's different in this command?
 -o "%(title)s.%(ext)s": This tells the tool: "Name the file just the video title. Don't add the weird ID code at the end."
 
@@ -95,8 +97,10 @@ You can actually rename the file before you download it by typing the name you w
 
 Example: If you want the file to be named exactly "My Jam.m4a", you type:
 
-DOS
+DOS:
+
 yt-dlp -x --audio-format m4a -o "My Jam.%(ext)s" https://youtu.be/WECKJ1VzCVA
+
 (Just replace "My Jam" with whatever name you want).
 
 "FFmpeg not found": Make sure ffmpeg.exe is sitting right next to yt-dlp.exe in the same folder.
