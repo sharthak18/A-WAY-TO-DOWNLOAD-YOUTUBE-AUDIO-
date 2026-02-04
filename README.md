@@ -68,4 +68,35 @@ Hit Enter. You will see lines of text flying by. When it stops, the song file wi
 Troubleshooting
 "Command not found": You probably didn't open the cmd window inside the folder. Try Step 2 again.
 
+
+Here is the upgraded command that will:
+
+Remove the ID from the filename.
+
+Add the Cover Art (Thumbnail) to the file so it shows up on your phone.
+
+Add Metadata (Artist/Song info) so your car/phone display reads it correctly.
+
+Copy and paste this command:
+
+DOS
+yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%(title)s.%(ext)s" https://youtu.be/WECKJ1VzCVA
+What's different in this command?
+-o "%(title)s.%(ext)s": This tells the tool: "Name the file just the video title. Don't add the weird ID code at the end."
+
+--embed-thumbnail: This grabs the picture from the YouTube video and "glues" it onto your song file as the album art.
+
+--add-metadata: This writes the song details inside the file, so when you play it on your phone, it doesn't just say "Unknown Artist."
+
+Pro Tip for "Official" Music Videos
+Sometimes YouTube titles are messy, like "Linkin Park - Numb (Official Video)". You don't want (Official Video) showing up on your phone.
+
+You can actually rename the file before you download it by typing the name you want inside the quotes.
+
+Example: If you want the file to be named exactly "My Jam.m4a", you type:
+
+DOS
+yt-dlp -x --audio-format m4a -o "My Jam.%(ext)s" https://youtu.be/WECKJ1VzCVA
+(Just replace "My Jam" with whatever name you want).
+
 "FFmpeg not found": Make sure ffmpeg.exe is sitting right next to yt-dlp.exe in the same folder.
