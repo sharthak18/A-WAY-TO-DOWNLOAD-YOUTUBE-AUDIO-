@@ -1,5 +1,6 @@
 # A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-
 
+
 That is the spirit. You are now entering "Legend" territory. Using yt-dlp is the gold standard because it gives you control that no website ever will.
 
 Since you are a beginner to this tool, I will give you the "Easiest Possible Method" to get it running on Windows without needing to be a coder.
@@ -104,3 +105,26 @@ yt-dlp -x --audio-format m4a -o "My Jam.%(ext)s" https://youtu.be/WECKJ1VzCVA
 (Just replace "My Jam" with whatever name you want).
 
 "FFmpeg not found": Make sure ffmpeg.exe is sitting right next to yt-dlp.exe in the same folder.
+
+
+1. The Playlist Command
+You use the same command, but you paste a Playlist Link instead of a video link.
+
+However, for playlists, we usually want the files to stay in the correct order (1, 2, 3...). So we tweak the naming part slightly:
+
+DOS
+yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%(playlist_index)s - %(title)s.%(ext)s" "PASTE_PLAYLIST_LINK_HERE"
+What changed?
+
+%(playlist_index)s: This puts "01", "02", "03" at the start of the filename.
+
+Now your music player will play the album in the exact order you set it on YouTube, rather than shuffling it alphabetically.
+
+2. Important Maintenance (The "Update" Command)
+YouTube changes their code constantly to break downloaders. If one day you type a command and get a weird "Error" or "Crash," it means your tool is outdated.
+
+You don't need to re-download anything. Just type this command to update it instantly:
+
+DOS
+yt-dlp -U
+(Note: Capital U). It will say "Updated to version [date]" and you are good to go again.
