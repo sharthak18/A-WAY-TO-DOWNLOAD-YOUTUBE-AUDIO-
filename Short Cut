@@ -76,3 +76,24 @@ pause
 Note: I added --embed-thumbnail to this one too, so your video files on your computer will show the actual video thumbnail instead of a random frame!
 
 Enjoy your collection!
+
+
+=========================================
+2026 UPDATE - READ THIS IF YOU GET "403 Forbidden"
+=========================================
+The .bat files above still work, but if a download dies with
+
+    ERROR: unable to download video data: HTTP Error 403: Forbidden
+
+it is not the link and not ffmpeg: your yt-dlp is too old. Update first:
+
+    python -m pip install -U yt-dlp        (pip install)
+    yt-dlp -U                              (standalone yt-dlp.exe)
+
+Then use ytgrab.py in this folder instead of typing flags - it checks your
+setup, enables node/bun as a JavaScript runtime, and automatically retries
+with different YouTube player clients when one gets blocked:
+
+    python3 ytgrab.py            (Windows: double-click run.bat)
+
+Full error-by-error guide: TROUBLESHOOTING.md
