@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: dark; }
+  body {
+    width: 300px; margin: 0; color: #e7ecf3;
+    font: 13px/1.45 system-ui, sans-serif;
+    background: #141820; padding: 14px;
+  }
+  h1 { font-size: 15px; margin: 0 0 2px; display: flex; gap: 8px; align-items: center; }
+  .sub { color: #8d99ab; font-size: 11.5px; margin-bottom: 12px; }
+  .pill {
+    padding: 4px 10px; border-radius: 99px; font-size: 11.5px;
+    border: 1px solid #2a3140; color: #8d99ab; background: #0f131a;
+  }
+  .pill.ok { color: #3ecf8e; } .pill.bad { color: #ff5c6c; }
+  input, button { font: inherit; border-radius: 8px; border: 1px solid #2a3140; }
+  input { width: 100%; background: #0f131a; color: inherit; padding: 9px 10px; outline: none; }
+  button { background: #232b37; color: inherit; padding: 8px 12px; cursor: pointer; }
+  button.primary { background: linear-gradient(140deg, #4f8cff, #2f6fe0); border: 0; color: #fff; font-weight: 600; }
+  button:hover { filter: brightness(1.15); }
+  .row { display: flex; gap: 8px; margin-top: 10px; }
+  .row input { flex: 1; }
+  .items { margin-top: 12px; max-height: 180px; overflow: auto; display: grid; gap: 6px; }
+  .item { display: flex; gap: 8px; align-items: center; background: #0f131a; border: 1px solid #2a3140; border-radius: 8px; padding: 6px 8px; }
+  .item .k { font-size: 14px; }
+  .item .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .item button { padding: 3px 8px; font-size: 11.5px; }
+  label { font-size: 11.5px; color: #8d99ab; display: block; margin-top: 10px; }
+  .muted { color: #8d99ab; font-size: 11.5px; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <h1>▣ GrabBox <span id="health" class="pill">…</span></h1>
+  <div class="sub">keep anything downloadable, on your device</div>
+
+  <input id="url" placeholder="Paste a link to analyze…" spellcheck="false">
+  <div class="row">
+    <button id="grab" class="primary">Analyze &amp; Grab</button>
+    <button id="open">Open app</button>
+  </div>
+
+  <label>Detected on this page</label>
+  <div id="items" class="items"></div>
+  <div id="none" class="muted">Nothing downloadable spotted here — the toolbar icon stays faded on pages like this.</div>
+
+  <label>GrabBox app address</label>
+  <div class="row"><input id="server"></div>
+  <div class="muted">Run the app first: <code>python3 -m grabbox</code></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
