@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GrabBox — keep it local</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">▣</span>
+    <div>
+      <h1>GrabBox</h1>
+      <p class="tag">video · audio · images · files · software</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="health" class="pill" title="yt-dlp status">checking…</span>
+    <button id="settingsBtn" class="ghost" title="Settings">⚙</button>
+  </div>
+</header>
+
+<main>
+  <section class="paste-card">
+    <div class="paste-row">
+      <input id="url" type="url" placeholder="Paste any link — a video, a song, an image, an installer, a whole playlist…"
+             autocomplete="off" spellcheck="false">
+      <button id="go" class="primary">Analyze</button>
+    </div>
+    <div class="paste-hints">
+      <span id="clipHint" class="hidden">📋 Clipboard: <b id="clipUrl"></b> <button id="useClip" class="linkish">use it</button></span>
+      <span class="muted">Runs 100% on this device. Nothing is uploaded anywhere.</span>
+    </div>
+  </section>
+
+  <section id="result" class="card hidden">
+    <div class="result-head">
+      <img id="rThumb" alt="" class="thumb">
+      <div class="result-meta">
+        <h2 id="rTitle">—</h2>
+        <p id="rSub" class="muted"></p>
+        <div class="kind-row" id="rKinds"></div>
+      </div>
+    </div>
+    <div id="rWarn" class="warnbox hidden"></div>
+    <div class="result-controls">
+      <label>Quality
+        <select id="rQuality"></select>
+      </label>
+      <label>Save as
+        <input id="rName" type="text" placeholder="original name">
+      </label>
+      <button id="rDownload" class="primary big">Download</button>
+    </div>
+    <div id="rPlaylist" class="playlist hidden"></div>
+  </section>
+
+  <section class="columns">
+    <div class="card">
+      <div class="card-head"><h3>Queue</h3><button id="clearJobs" class="linkish">clear finished</button></div>
+      <div id="jobs" class="jobs"><p class="empty">Nothing downloading yet.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Downloads</h3>
+        <button id="openDir" class="linkish">open folder</button>
+      </div>
+      <div id="files" class="files"><p class="empty">Loading…</p></div>
+    </div>
+  </section>
+</main>
+
+<div id="settings" class="drawer hidden">
+  <div class="drawer-inner">
+    <h3>Settings</h3>
+    <label>Download folder
+      <input id="sDir" type="text">
+    </label>
+    <label>Parallel downloads
+      <input id="sConc" type="number" min="1" max="8">
+    </label>
+    <label>Browser cookies (fixes age-restricted / members-only)
+      <select id="sCookies">
+        <option value="">off</option>
+        <option value="chrome">chrome</option>
+        <option value="firefox">firefox</option>
+        <option value="edge">edge</option>
+        <option value="brave">brave</option>
+        <option value="safari">safari</option>
+      </select>
+    </label>
+    <label class="check"><input id="sClip" type="checkbox"> Watch the clipboard for links</label>
+    <div id="sHealth" class="healthbox"></div>
+    <div class="drawer-actions">
+      <button id="sSave" class="primary">Save</button>
+      <button id="sClose" class="ghost">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>
