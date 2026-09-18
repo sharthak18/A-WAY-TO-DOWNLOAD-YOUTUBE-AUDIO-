@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.ytgrab-archive.txt
+dist/
+build/
+*.spec.bak
+android/apk/app/build/
+android/apk/build/
+android/apk/.gradle/
+*.apk
+vendor/

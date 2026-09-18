@@ -1,7 +1,119 @@
 # A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-
 
-
 That is the spirit. You are now entering "Legend" territory. Using yt-dlp is the gold standard because it gives you control that no website ever will.
+
+---
+
+## Getting `HTTP Error 403: Forbidden`? Read this first
+
+If your download dies with:
+
+```
+[youtube] XXXXXXXX: Downloading android vr player API JSON
+ERROR: unable to download video data: HTTP Error 403: Forbidden
+```
+
+your link is fine — your **yt-dlp is too old**. YouTube started rejecting the
+`android_vr` player client that old builds use by default, and it was removed
+from the defaults in release `2026.08.19`. One command usually ends it:
+
+```bash
+python -m pip install -U yt-dlp     # or: yt-dlp -U  for the standalone .exe
+```
+
+Everything else that can go wrong — cookies, player clients, ffmpeg, the
+JavaScript runtime, rate limits — is written up in
+**[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
+
+## The easy way: `ytgrab.py`
+
+Instead of memorising flags, run the menu:
+
+```bash
+python3 ytgrab.py           # Linux / macOS   (Windows: double-click run.bat)
+```
+
+```
+================================
+  ytgrab  -  keep your media local
+================================
+  yt-dlp : 2026.08.19
+           27 day(s) old (fresh - update if older than 45 days)
+  ffmpeg : /usr/bin/ffmpeg
+  JS     : deno (~/.deno/bin/deno)
+
+Paste your URL: https://youtu.be/OfS1jFck8YQ
+
+Choose format:
+  1) Best video + audio (mp4, works on any phone)
+  2) Audio - opus (best quality per MB, small files)
+  3) Audio - flac (lossless container, big files)
+  4) Audio - m4a (great quality, plays everywhere)
+  5) Audio - mp3 (maximum compatibility)
+  p) Same thing, but for a whole playlist / album
+  c) Retry the last URL with browser cookies (fixes most 403s)
+  l) List available formats for a URL
+  u) Update yt-dlp
+  d) Doctor - check yt-dlp / ffmpeg / deno
+  q) Quit
+Choice [1-5]: 5
+```
+
+What it does that a plain `yt-dlp` call does not:
+
+* **Checks your setup first** — yt-dlp age, ffmpeg, JavaScript runtime — and
+  offers to update a stale yt-dlp before it costs you a failed download.
+* **Enables node/bun as JS runtimes.** yt-dlp only enables deno on its own, so
+  if you have node it still reports `JS runtimes: none` and quietly drops to a
+  single player client.
+* **Retries on its own.** If YouTube answers 403/429, it walks a ladder —
+  defaults → skip `android_vr` + add `web_safari` → TV clients → IPv4 — and
+  says what each attempt is doing.
+* **Clean files.** Title-only names (safe on Windows too), embedded metadata
+  and cover art, saved to `~/Downloads`, and a download archive so re-running a
+  playlist never fetches the same track twice.
+* **Plain-English errors.** "YouTube refused the stream URL (403). Cause is
+  almost always an outdated yt-dlp - update it first, then retry."
+
+Useful one-liners:
+
+```bash
+python3 ytgrab.py --doctor                       # is my setup healthy?
+python3 ytgrab.py --update                       # update yt-dlp
+python3 ytgrab.py "URL" --format 5               # mp3, no menu
+python3 ytgrab.py "PLAYLIST" --format 4 --playlist   # whole album as m4a
+python3 ytgrab.py --list "URL"                   # what formats exist?
+python3 ytgrab.py "URL" --format 5 --cookies chrome  # the 403 last resort
+```
+
+Files: `ytgrab.py` (the tool), `run.bat` (Windows double-click),
+`run.sh` (Linux/macOS), `TROUBLESHOOTING.md` (every error, explained).
+
+> Keep it personal: your own uploads, Creative-Commons material, offline
+> copies you are allowed to keep. Downloading other people's copyright material
+> breaks YouTube's terms and, depending on where you live, the law.
+
+---
+
+## Want real software? GrabBox (desktop app + extension + Android)
+
+If menus feel like work, there is a proper app in this repo:
+
+```bash
+python3 -m grabbox      # opens a window: paste a link, pick quality, done
+```
+
+* **One UI for everything** — video, audio, images, installers, archives,
+  playlists, and all 1800+ yt-dlp sites.
+* **Browser extension** (`extension/`) — a *faded* icon that lights up when a
+  page has something worth grabbing, right-click "Grab with GrabBox", and a
+  hover mini-button on any downloadable thing.
+* **Android** — Termux one-script install, or a WebView APK built by CI.
+* **Windows / macOS / Linux** launchers, and one-file binaries via CI.
+
+Full install + run guide for every platform: **[APP.md](APP.md)**.
+
+## The manual way (how it all works underneath)
 
 Since you are a beginner to this tool, I will give you the "Easiest Possible Method" to get it running on Windows without needing to be a coder.
 
@@ -128,3 +240,13 @@ You don't need to re-download anything. Just type this command to update it inst
 DOS
 yt-dlp -U
 (Note: Capital U). It will say "Updated to version [date]" and you are good to go again.
+
+If yt-dlp was installed with pip, `-U` cannot update it and you will see the
+warning *"You installed yt-dlp with pip... Use that to update."* Then run:
+
+DOS
+python -m pip install -U yt-dlp
+
+Check the result with `yt-dlp --version`. It prints a date, like `2026.08.19`;
+anything older than about 45 days is worth updating before you blame your link.
+`python3 ytgrab.py --update` tries both methods for you.

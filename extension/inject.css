@@ -1,0 +1,25 @@
+/* The faded grab button that appears on hover over downloadable media. */
+.grabbox-btn {
+  position: absolute;
+  z-index: 2147483646;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(20, 24, 32, 0.85);
+  color: #fff;
+  border: 1px solid rgba(120, 160, 255, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font: 15px/1 system-ui, sans-serif;
+  cursor: pointer;
+  opacity: 0.45;               /* faded until hovered */
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.grabbox-btn.show { display: flex; }
+.grabbox-btn:hover {
+  opacity: 1;
+  transform: scale(1.08);
+  background: rgba(47, 111, 224, 0.95);
+}
