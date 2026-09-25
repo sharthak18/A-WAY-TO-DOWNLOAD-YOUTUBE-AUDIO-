@@ -12,9 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "app.grabbox"
-        // Android 6+; the bundled engine (youtubedl-android) is minSdk 21, we
-        // stay one notch above for the notification/permission model.
-        minSdk = 23
+        // youtubedl-android 0.18.1 requires Android 7.0/API 24.
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"

@@ -57,7 +57,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=os.path.join(HERE, "extension", "icons", "icon-128.png"),
+    icon=ICON,
 )
 
 coll = COLLECT(
