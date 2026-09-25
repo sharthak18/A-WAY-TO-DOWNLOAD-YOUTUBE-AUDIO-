@@ -5,12 +5,23 @@
 # still hot-serve style/app updates without a rebuild.
 
 import os
+import sys
 
 block_cipher = None
 
 # SPEC lives in <repo>/packaging/, so the repo root is one level up.
 HERE = os.path.abspath(os.path.dirname(os.path.dirname(SPEC)))
 WEB = os.path.join(HERE, "grabbox", "web")
+
+# PyInstaller needs a native icon format on Windows and macOS.  The extension
+# icon is a PNG, which works on Linux/macOS only when Pillow is installed and
+# otherwise makes Windows builds fail during EXE assembly.
+if sys.platform == "win32":
+    ICON = os.path.join(HERE, "desktop", "src-tauri", "icons", "icon.ico")
+elif sys.platform == "darwin":
+    ICON = os.path.join(HERE, "desktop", "src-tauri", "icons", "icon.icns")
+else:
+    ICON = os.path.join(HERE, "extension", "icons", "icon-128.png")
 
 a = Analysis(
     [os.path.join(HERE, "launch.py")],

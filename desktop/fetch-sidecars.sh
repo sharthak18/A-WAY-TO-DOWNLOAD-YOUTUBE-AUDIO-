@@ -38,9 +38,15 @@ for triple in "${TARGETS[@]}"; do
   dl "https://github.com/yt-dlp/yt-dlp/releases/latest/download/${ytdlp}" \
      "$BIN_DIR/yt-dlp-${triple}${suffix}"
 
-  # --- ffmpeg (Martin Riedl static release builds, all OS/arch)
-  dl "https://ffmpeg.martin-riedl.de/redirect/latest/${os}/${arch}/release/ffmpeg.zip" \
-     "$WORK/ffmpeg-${triple}.zip"
+  # --- ffmpeg (Martin Riedl provides macOS/Linux builds; Windows uses the
+  #     maintained static BtbN release because Martin Riedl does not publish
+  #     Windows artifacts.)
+  if [[ "$os" == "windows" ]]; then
+    ffmpeg_url="https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
+  else
+    ffmpeg_url="https://ffmpeg.martin-riedl.de/redirect/latest/${os}/${arch}/release/ffmpeg.zip"
+  fi
+  dl "$ffmpeg_url" "$WORK/ffmpeg-${triple}.zip"
   unzip -o -q "$WORK/ffmpeg-${triple}.zip" "ffmpeg${suffix}" -d "$WORK/$triple" \
     || unzip -o -q "$WORK/ffmpeg-${triple}.zip" -d "$WORK/$triple"
   ff="$(find "$WORK/$triple" -name "ffmpeg${suffix}" -type f | head -1)"
