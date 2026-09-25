@@ -4,10 +4,19 @@ const $ = (s) => document.querySelector(s);
 const ICON = { video: "🎬", audio: "🎵", image: "🖼️", file: "⬇️" };
 
 let server = "http://127.0.0.1:8765";
+let activeTabId = null;
 
+/** Ask the page to show the Grab Dialog; fall back to opening the app tab. */
 function openGrab(url) {
-  chrome.runtime.sendMessage({ type: "grab", url });
-  window.close();
+  if (activeTabId != null) {
+    chrome.tabs.sendMessage(activeTabId, { type: "open-dialog", url }, () => {
+      if (chrome.runtime.lastError) chrome.runtime.sendMessage({ type: "grab", url });
+      window.close();
+    });
+  } else {
+    chrome.runtime.sendMessage({ type: "grab", url });
+    window.close();
+  }
 }
 
 function esc(s) {
@@ -34,6 +43,7 @@ async function init() {
   let tabId = null;
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tabs.length) tabId = tabs[0].id;
+  activeTabId = tabId;
   let items = [];
   if (tabId != null) {
     try {

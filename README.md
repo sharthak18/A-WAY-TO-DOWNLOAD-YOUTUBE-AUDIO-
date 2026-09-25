@@ -2,6 +2,9 @@
 
 That is the spirit. You are now entering "Legend" territory. Using yt-dlp is the gold standard because it gives you control that no website ever will.
 
+💬 Feedback, ideas, bug reports? Email **feedit18@gmail.com** — or use the chat
+button inside the app (top right), it pre-fills everything we need to help.
+
 ---
 
 ## Getting `HTTP Error 403: Forbidden`? Read this first
@@ -100,15 +103,23 @@ Files: `ytgrab.py` (the tool), `run.bat` (Windows double-click),
 If menus feel like work, there is a proper app in this repo:
 
 ```bash
-python3 -m grabbox      # opens a window: paste a link, pick quality, done
+python3 -m grabbox      # opens the app: paste a link, pick quality, done
 ```
 
+* **Desktop app (new, Tauri)** (`desktop/`) — native window, real installers
+  (.msi / .dmg / .AppImage / .deb) with yt-dlp + ffmpeg + deno bundled. Nothing
+  to install first. See **[RESEARCH.md](RESEARCH.md)** for the design research
+  behind it.
 * **One UI for everything** — video, audio, images, installers, archives,
-  playlists, and all 1800+ yt-dlp sites.
+  playlists, and all 1800+ yt-dlp sites. The same UI runs in the desktop
+  window, in your browser via `python3 -m grabbox`, and over your Wi-Fi.
 * **Browser extension** (`extension/`) — a *faded* icon that lights up when a
   page has something worth grabbing, right-click "Grab with GrabBox", and a
   hover mini-button on any downloadable thing.
-* **Android** — Termux one-script install, or a WebView APK built by CI.
+* **Android app (native)** (`android/`) — Kotlin + Jetpack Compose with the
+  yt-dlp engine bundled in; share any link to it like you would to Seal,
+  works on Android 6+, asks for permissions only when it actually needs them.
+  Termux one-script install is still there for the nerds.
 * **Windows / macOS / Linux** launchers, and one-file binaries via CI.
 
 Full install + run guide for every platform: **[APP.md](APP.md)**.

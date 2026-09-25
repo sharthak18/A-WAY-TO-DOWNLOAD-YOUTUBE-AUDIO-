@@ -36,7 +36,7 @@ jobs:
           path: dist/GrabBox
 
   android:
-    name: GrabBox APK
+    name: GrabBox Android APKs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,15 +47,21 @@ jobs:
           java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
 
-      - name: Build debug APK
-        working-directory: android/apk
+      # Native app (Jetpack Compose + bundled yt-dlp engine). One APK per ABI
+      # keeps each download small; pick arm64-v8a unless the phone is very old.
+      # Debug build on purpose: it ships pre-signed with the debug key so it
+      # installs with zero friction until release signing is wired up.
+      - name: Build APKs (per-ABI)
+        working-directory: android
         run: gradle assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
-          name: GrabBox-APK
-          path: android/apk/app/build/outputs/apk/debug/app-debug.apk
+          name: GrabBox-Android
+          path: android/app/build/outputs/apk/**/*.apk
 
 # NOTE: this file is a TEMPLATE. To enable CI builds, copy it to
 #   .github/workflows/build.yml

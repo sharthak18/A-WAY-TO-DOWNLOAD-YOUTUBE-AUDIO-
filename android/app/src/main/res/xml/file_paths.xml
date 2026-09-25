@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Files shared via "Open" from the Downloads list. -->
+    <external-path name="downloads" path="Download/GrabBox/" />
+    <files-path name="internal" path="downloads/" />
+    <external-files-path name="appfiles" path="." />
+</paths>
