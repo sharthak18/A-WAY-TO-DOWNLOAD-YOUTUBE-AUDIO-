@@ -1,10 +1,11 @@
 /*
  * GrabBox background service worker (Manifest V3).
  *
- * - Toolbar icon stays FADED until a content script reports downloadable media
- *   on a tab, then it lights up and shows a count badge.
- * - Right-click "Grab with GrabBox" on any link / video / audio / image.
- * - Grabbing just opens the local app with ?url=... so the user picks quality.
+ * - Toolbar icon stays FADED until a content script reports downloadable media,
+ *   then it lights up and shows a count badge.
+ * - Right-click "Grab with GrabBox" opens the in-page Grab Dialog (IDM-style).
+ *   Pages where a content script cannot run fall back to opening the app.
+ * - Proxies probe/download calls to the local app so the dialog never hits CORS.
  */
 "use strict";
 
@@ -41,8 +42,15 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "grab-link") url = info.linkUrl;
   else if (info.menuItemId === "grab-media") url = info.srcUrl;
   else if (info.menuItemId === "grab-page") url = info.pageUrl || (tab && tab.url);
-  if (url) grab(url);
+  if (url && tab && tab.id != null) openDialogOrApp(tab.id, url);
 });
+
+/** Try the in-page dialog; fall back to opening the app tab. */
+function openDialogOrApp(tabId, url) {
+  chrome.tabs.sendMessage(tabId, { type: "open-dialog", url }, () => {
+    if (chrome.runtime.lastError) grab(url); // no content script on this page
+  });
+}
 
 /* --------------------------------------------------------- content messages */
 API.onMessage.addListener((msg, sender, sendResponse) => {
@@ -58,9 +66,26 @@ API.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ ok: true });
     return;
   }
+  if (msg.type === "probe") {
+    post("/api/probe", { url: msg.url })
+      .then((res) => sendResponse(res))
+      .catch(() => sendResponse(null));
+    return true;
+  }
+  if (msg.type === "download") {
+    post("/api/download", msg.body || {})
+      .then((res) => sendResponse(res))
+      .catch(() => sendResponse(null));
+    return true;
+  }
+  if (msg.type === "open-app") {
+    chrome.tabs.create({ url: serverUrl });
+    sendResponse({ ok: true });
+    return;
+  }
   if (msg.type === "health") {
     checkHealth().then((h) => sendResponse(h));
-    return true; // async response
+    return true;
   }
   if (msg.type === "get-server") {
     sendResponse({ server: serverUrl });
@@ -81,18 +106,33 @@ function setTabState(tabId, count) {
   else chrome.action.setBadgeText({ tabId, text: "" });
 }
 
-/* Reset the icon when a tab goes away. */
-chrome.tabs.onRemoved.addListener((tabId) => setTabStateSilent(tabId));
+chrome.tabs.onRemoved.addListener(() => {});
 chrome.tabs.onUpdated.addListener((tabId, change) => {
   if (change.status === "loading") setTabState(tabId, 0);
 });
-function setTabStateSilent(tabId) { /* icon state is per-tab; nothing stored */ }
 
 /* ----------------------------------------------------------------- grabbing */
+/** Legacy fallback: open the app with the link pre-analyzed. */
 function grab(url) {
   if (!url) return;
-  // Open the app with the link pre-analyzed; the user then chooses quality.
   chrome.tabs.create({ url: serverUrl.replace(/\/$/, "") + "/?url=" + encodeURIComponent(url) });
+}
+
+/* ------------------------------------------------------------- server calls */
+async function post(path, body) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120000); // probes can be slow
+  try {
+    const res = await fetch(serverUrl + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body || {}),
+      signal: ctrl.signal,
+    });
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function checkHealth() {

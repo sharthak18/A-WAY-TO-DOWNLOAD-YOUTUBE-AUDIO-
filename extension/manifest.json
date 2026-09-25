@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GrabBox",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Grab any video, audio, image or file into your GrabBox app. The icon lights up when a page has something worth keeping.",
   "icons": {
     "16": "icons/icon-16.png",

@@ -4,8 +4,16 @@ __pycache__/
 dist/
 build/
 *.spec.bak
-android/apk/app/build/
-android/apk/build/
-android/apk/.gradle/
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
 *.apk
+*.keystore
 vendor/
+
+# Tauri desktop
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+desktop/src-tauri/binaries/
+desktop/src-tauri/extension/

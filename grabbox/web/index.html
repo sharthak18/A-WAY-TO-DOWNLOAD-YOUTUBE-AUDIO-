@@ -8,100 +8,239 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 </head>
 <body>
+
+<!-- inline icon set (Material paths, currentColor) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gb-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4f8cff"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <symbol id="i-logo" viewBox="0 0 64 64">
+    <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#gb-grad)"/>
+    <path d="M32 14v22" stroke="#fff" stroke-width="5.5" stroke-linecap="round"/>
+    <path d="M21.5 29.5 32 40l10.5-10.5" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M18 48h28" stroke="#fff" stroke-width="5.5" stroke-linecap="round" opacity=".9"/>
+  </symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7z" fill="currentColor"/><path d="M5 18v2h14v-2H5z" fill="currentColor"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="currentColor"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" fill="currentColor"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" fill="currentColor"/></symbol>
+  <symbol id="i-open" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" fill="currentColor"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" fill="currentColor"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="currentColor"/></symbol>
+  <symbol id="i-puzzle" viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z" fill="currentColor"/></symbol>
+  <symbol id="i-update" viewBox="0 0 24 24"><path d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1-2.73 2.71-2.73 7.08 0 9.79 2.73 2.71 7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29-3.51 3.48-9.21 3.48-12.72 0-3.5-3.47-3.53-9.11-.02-12.58 3.51-3.47 9.14-3.47 12.65 0L21 3v7.12z" fill="currentColor"/></symbol>
+  <symbol id="i-warn" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z" fill="currentColor"/></symbol>
+</svg>
+
 <header class="topbar">
   <div class="brand">
-    <span class="logo">▣</span>
-    <div>
+    <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+    <div class="brand-text">
       <h1>GrabBox</h1>
-      <p class="tag">video · audio · images · files · software</p>
+      <p class="tag">keep it local</p>
     </div>
   </div>
   <div class="topbar-right">
-    <span id="health" class="pill" title="yt-dlp status">checking…</span>
-    <button id="settingsBtn" class="ghost" title="Settings">⚙</button>
+    <button id="health" class="pill" title="checking…">checking…</button>
+    <button id="feedbackBtn" class="icon-btn" title="Send feedback (email)"><svg><use href="#i-chat"/></svg></button>
+    <button id="themeBtn" class="icon-btn" title="Theme"><svg><use href="#i-palette"/></svg></button>
+    <button id="settingsBtn" class="icon-btn" title="Settings"><svg><use href="#i-settings"/></svg></button>
   </div>
 </header>
 
+<div id="setupBanner" class="banner hidden">
+  <svg class="mini"><use href="#i-warn"/></svg>
+  <span id="setupText">Setup needed.</span>
+  <button id="setupGo" class="text-btn">Fix it</button>
+</div>
+
 <main>
-  <section class="paste-card">
-    <div class="paste-row">
-      <input id="url" type="url" placeholder="Paste any link — a video, a song, an image, an installer, a whole playlist…"
-             autocomplete="off" spellcheck="false">
-      <button id="go" class="primary">Analyze</button>
+  <!-- HERO -->
+  <section class="hero">
+    <h2 class="hero-line">Grab anything from the web.</h2>
+    <p class="hero-sub">video · audio · images · software · playlists · 1800+ sites</p>
+    <div class="paste-box" id="pasteBox">
+      <svg class="lead"><use href="#i-link"/></svg>
+      <input id="url" type="url" placeholder="Paste a link"
+             autocomplete="off" spellcheck="false" enterkeyhint="go">
+      <button id="go" class="filled-btn grab-btn">
+        <svg class="mini"><use href="#i-download"/></svg><span>Grab</span>
+      </button>
     </div>
-    <div class="paste-hints">
-      <span id="clipHint" class="hidden">📋 Clipboard: <b id="clipUrl"></b> <button id="useClip" class="linkish">use it</button></span>
-      <span class="muted">Runs 100% on this device. Nothing is uploaded anywhere.</span>
+    <div class="hero-hints">
+      <span id="clipHint" class="chip ghost-chip hidden" role="button" tabindex="0">
+        <svg class="mini"><use href="#i-link"/></svg>
+        <b id="clipUrl"></b><span class="use">use it</span>
+      </span>
+      <span class="hint-text">Drop a link anywhere · runs 100% on this device</span>
     </div>
   </section>
 
-  <section id="result" class="card hidden">
-    <div class="result-head">
-      <img id="rThumb" alt="" class="thumb">
-      <div class="result-meta">
-        <h2 id="rTitle">—</h2>
-        <p id="rSub" class="muted"></p>
-        <div class="kind-row" id="rKinds"></div>
+  <!-- RESULT SHEET -->
+  <section id="result" class="sheet hidden" aria-live="polite">
+    <button id="rClose" class="icon-btn sheet-close" title="Close"><svg><use href="#i-close"/></svg></button>
+    <div class="sheet-head">
+      <div class="thumb-wrap"><img id="rThumb" alt=""><svg id="rThumbPh" class="thumb-ph"><use href="#i-play"/></svg></div>
+      <div class="sheet-meta">
+        <span id="rBadge" class="badge">…</span>
+        <h2 id="rTitle">Analyzing…</h2>
+        <p id="rSub" class="meta-line">—</p>
+        <div id="rWarn" class="warnbox hidden"></div>
       </div>
     </div>
-    <div id="rWarn" class="warnbox hidden"></div>
-    <div class="result-controls">
-      <label>Quality
-        <select id="rQuality"></select>
-      </label>
-      <label>Save as
-        <input id="rName" type="text" placeholder="original name">
-      </label>
-      <button id="rDownload" class="primary big">Download</button>
+
+    <div id="rErrWrap" class="hidden">
+      <p id="rErr" class="err-line"></p>
+      <p id="rErrHint" class="hint-line"></p>
     </div>
-    <div id="rPlaylist" class="playlist hidden"></div>
+
+    <div id="rOkWrap" class="hidden">
+      <div id="rKinds" class="segmented" role="tablist"></div>
+      <div id="rQuality" class="quality-grid"></div>
+      <div id="rPlaylist" class="playlist-box hidden">
+        <b>Playlist</b> — every item downloads numbered in order.
+        <ul id="rPlaylistList"></ul>
+      </div>
+      <details class="advanced">
+        <summary>Advanced</summary>
+        <div class="adv-grid">
+          <label class="field"><span>Save as</span>
+            <input id="rName" type="text" placeholder="original name">
+          </label>
+          <label class="check-row"><input id="rCookies" type="checkbox">
+            <span>Use browser cookies (fix for stubborn 403s)</span></label>
+        </div>
+      </details>
+      <div class="sheet-actions">
+        <span id="rSize" class="size-hint"></span>
+        <button id="rDownload" class="filled-btn big" disabled>
+          <svg class="mini"><use href="#i-download"/></svg><span>Download</span>
+        </button>
+      </div>
+    </div>
   </section>
 
-  <section class="columns">
-    <div class="card">
-      <div class="card-head"><h3>Queue</h3><button id="clearJobs" class="linkish">clear finished</button></div>
-      <div id="jobs" class="jobs"><p class="empty">Nothing downloading yet.</p></div>
-    </div>
+  <!-- QUEUE + FILES -->
+  <div class="sections">
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Queue</h3>
+        <button id="clearJobs" class="text-btn">Clear finished</button>
+      </div>
+      <div id="jobs" class="jobs"></div>
+    </section>
 
-    <div class="card">
-      <div class="card-head">
+    <section class="panel">
+      <div class="panel-head">
         <h3>Downloads</h3>
-        <button id="openDir" class="linkish">open folder</button>
+        <div class="head-actions">
+          <span id="dirChip" class="dir-chip" title=""><svg class="mini"><use href="#i-folder"/></svg><b id="dirName"></b></span>
+          <button id="openDir" class="icon-btn" title="Open folder"><svg><use href="#i-open"/></svg></button>
+        </div>
       </div>
-      <div id="files" class="files"><p class="empty">Loading…</p></div>
-    </div>
-  </section>
+      <div id="files" class="files"></div>
+    </section>
+  </div>
 </main>
 
-<div id="settings" class="drawer hidden">
-  <div class="drawer-inner">
-    <h3>Settings</h3>
-    <label>Download folder
-      <input id="sDir" type="text">
-    </label>
-    <label>Parallel downloads
-      <input id="sConc" type="number" min="1" max="8">
-    </label>
-    <label>Browser cookies (fixes age-restricted / members-only)
-      <select id="sCookies">
-        <option value="">off</option>
-        <option value="chrome">chrome</option>
-        <option value="firefox">firefox</option>
-        <option value="edge">edge</option>
-        <option value="brave">brave</option>
-        <option value="safari">safari</option>
-      </select>
-    </label>
-    <label class="check"><input id="sClip" type="checkbox"> Watch the clipboard for links</label>
-    <div id="sHealth" class="healthbox"></div>
-    <div class="drawer-actions">
-      <button id="sSave" class="primary">Save</button>
-      <button id="sClose" class="ghost">Close</button>
+<!-- THEME POPUP -->
+<div id="themeDlg" class="scrim hidden">
+  <div class="dlg narrow pop-anchor">
+    <div class="dlg-head"><h3>Theme</h3>
+      <button class="icon-btn" data-close="themeDlg"><svg><use href="#i-close"/></svg></button></div>
+    <div class="seg-col">
+      <span class="dlg-label">Mode</span>
+      <div id="tModes" class="segmented">
+        <button data-mode="auto">Auto</button><button data-mode="dark">Dark</button><button data-mode="light">Light</button>
+      </div>
+    </div>
+    <div class="seg-col">
+      <span class="dlg-label">Accent</span>
+      <div id="tSeeds" class="swatches"></div>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast hidden"></div>
+<!-- SETTINGS -->
+<div id="settings" class="scrim hidden">
+  <div class="dlg">
+    <div class="dlg-head"><h3>Settings</h3>
+      <button class="icon-btn" data-close="settings"><svg><use href="#i-close"/></svg></button></div>
+
+    <label class="field"><span>Download folder</span>
+      <div class="row-gap">
+        <input id="sDir" type="text" spellcheck="false">
+        <button id="sBrowse" class="tonal-btn hidden">Browse…</button>
+      </div>
+    </label>
+
+    <div class="two-col">
+      <label class="field"><span>Parallel downloads</span>
+        <select id="sConc"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+      </label>
+      <label class="field"><span>Cookies from browser</span>
+        <select id="sCookies">
+          <option value="">None</option><option>chrome</option><option>firefox</option>
+          <option>edge</option><option>brave</option><option>safari</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="check-row switch-row"><span>Watch clipboard for links</span>
+      <input id="sClip" type="checkbox" class="switch"></label>
+
+    <div class="dlg-actions col">
+      <button id="sExtension" class="tonal-btn"><svg class="mini"><use href="#i-puzzle"/></svg><span>Add the browser extension</span></button>
+      <button id="sUpdate" class="tonal-btn"><svg class="mini"><use href="#i-update"/></svg><span>Update yt-dlp</span></button>
+    </div>
+
+    <pre id="sHealth" class="healthbox"></pre>
+
+    <div class="dlg-foot">
+      <button id="sFeedback" class="text-btn">
+        <svg class="mini"><use href="#i-chat"/></svg> Feedback</button>
+      <button id="sSave" class="filled-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTENSION GUIDE -->
+<div id="extDlg" class="scrim hidden">
+  <div class="dlg">
+    <div class="dlg-head"><h3>Add the browser extension</h3>
+      <button class="icon-btn" data-close="extDlg"><svg><use href="#i-close"/></svg></button></div>
+    <div id="extBrowserTabs" class="segmented">
+      <button data-b="chrome" class="on">Chrome / Edge / Brave</button>
+      <button data-b="firefox">Firefox</button>
+    </div>
+    <ol id="extSteps" class="steps"></ol>
+    <p class="meta-line">The icon stays <b>faded</b> until a page has something worth
+      grabbing — then it lights up with a count. Right-click anything →
+      <b>Grab with GrabBox</b>.</p>
+    <div class="dlg-foot">
+      <button id="extOpenFolder" class="tonal-btn hidden">Open extension folder</button>
+      <button class="filled-btn" data-close="extDlg">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- drag-drop overlay -->
+<div id="dropOverlay" class="drop-overlay hidden">
+  <div class="drop-card">
+    <svg class="big-ico"><use href="#i-download"/></svg>
+    <p>Drop the link to grab it</p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
 <script src="app.js"></script>
 </body>
 </html>

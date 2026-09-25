@@ -1,72 +1,238 @@
-/* GrabBox web UI. No frameworks, no build step - just fetch() and the DOM. */
+/*
+ * GrabBox UI v2 — no frameworks, no build step.
+ *
+ * One UI, two transports ("driver layer"):
+ *   · served by the Python server  -> HTTP fetch to /api/*
+ *   · running inside Tauri         -> window.__TAURI__ invoke()
+ * Both return the exact same shapes, so nothing below the driver cares.
+ */
 "use strict";
 
 const $ = (sel) => document.querySelector(sel);
-const api = {
-  get: (p) => fetch(p).then((r) => r.json()),
-  post: (p, body) =>
-    fetch(p, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body || {}),
-    }).then((r) => r.json()),
-};
+const on = (el, ev, fn) => el.addEventListener(ev, fn);
 
-const QUALITIES = {
-  video: [
-    ["best", "Best available"],
-    ["2160", "2160p (4K)"],
-    ["1440", "1440p"],
-    ["1080", "1080p"],
-    ["720", "720p"],
-    ["480", "480p"],
-    ["360", "360p (small file)"],
-  ],
-  audio: [
-    ["m4a", "m4a — great quality, plays everywhere"],
-    ["opus", "opus — best quality per MB"],
-    ["mp3", "mp3 — maximum compatibility"],
-    ["flac", "flac — lossless container (big, no extra detail)"],
-    ["best", "original stream, no re-encode"],
-  ],
-  file: [["original", "original file, exactly as served"]],
+/* ============================================================ driver === */
+
+function httpDriver() {
+  const get = (p) => fetch(p).then((r) => r.json());
+  const post = (p, body) => fetch(p, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body || {}),
+  }).then((r) => r.json());
+  return {
+    name: "server",
+    health: () => get("/api/health"),
+    probe: (url, cookies) => post("/api/probe", { url, cookies }),
+    download: (b) => post("/api/download", b),
+    jobs: () => get("/api/jobs"),
+    cancel: (id) => post(`/api/jobs/${id}/cancel`),
+    clearJobs: () => post("/api/jobs/clear"),
+    files: () => get("/api/files"),
+    fileAction: (path, action) => post("/api/files/open", { path, action }),
+    getConfig: () => get("/api/config"),
+    setConfig: (cfg) => post("/api/config", cfg),
+    clipboard: () => get("/api/clipboard"),
+    updateYtdlp: () => post("/api/update-ytdlp"),
+    pickFolder: null,               // browsers cannot pick folders
+    openExtensionFolder: null,
+  };
+}
+
+function tauriDriver() {
+  const invoke = window.__TAURI__.core.invoke;
+  return {
+    name: "tauri",
+    health: () => invoke("grabbox_health"),
+    probe: (url, cookies) => invoke("grabbox_probe", { url, cookies: cookies || null }),
+    download: (b) => invoke("grabbox_download", b),
+    jobs: () => invoke("grabbox_jobs").then((jobs) => ({ jobs })),
+    cancel: (id) => invoke("grabbox_cancel", { id }),
+    clearJobs: () => invoke("grabbox_clear_jobs"),
+    files: () => invoke("grabbox_files"),
+    fileAction: (path, action) => invoke("grabbox_file_action", { path, action }),
+    getConfig: () => invoke("grabbox_get_config"),
+    setConfig: (cfg) => invoke("grabbox_set_config", { config: cfg }),
+    clipboard: () => invoke("grabbox_clipboard"),
+    updateYtdlp: () => invoke("grabbox_update_ytdlp"),
+    pickFolder: () => invoke("grabbox_pick_folder"),
+    openExtensionFolder: () => invoke("grabbox_open_extension_folder"),
+    takePendingUrl: () => invoke("grabbox_take_pending_url"),
+    onGrabUrl: (cb) => window.__TAURI__.event.listen("grab-url", (e) => cb(e.payload)),
+  };
+}
+
+const driver = (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke)
+  ? tauriDriver() : httpDriver();
+
+/* ============================================================ theme ==== */
+/* Material-adaptive: one accent seed -> full tonal palette -> CSS vars. */
+
+const SEEDS = {
+  blue: "#4f8cff", violet: "#8b5cf6", teal: "#14b8a6",
+  green: "#3ecf8e", orange: "#f59e0b", pink: "#ec4899",
 };
+const THEME_KEY = "grabbox:theme";
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function rgbToHex([r, g, b]) {
+  const c = (v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0");
+  return "#" + c(r) + c(g) + c(b);
+}
+function mix(a, b, t) {
+  const A = hexToRgb(a), B = hexToRgb(b);
+  return rgbToHex(A.map((v, i) => v + (B[i] - v) * t));
+}
+function hueShift(hex, deg) {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0; const l = (max + min) / 2, d = max - min;
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+  }
+  h = (h + deg + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
+  let rgb = [0, 0, 0];
+  if (h < 60) rgb = [c, x, 0]; else if (h < 120) rgb = [x, c, 0];
+  else if (h < 180) rgb = [0, c, x]; else if (h < 240) rgb = [0, x, c];
+  else if (h < 300) rgb = [x, 0, c]; else rgb = [c, 0, x];
+  return rgbToHex(rgb.map((v) => (v + m) * 255));
+}
+
+let theme = { mode: "auto", seed: "blue" };
+try { Object.assign(theme, JSON.parse(localStorage.getItem(THEME_KEY) || "{}")); } catch (e) {}
+
+function applyTheme() {
+  const seed = SEEDS[theme.seed] || SEEDS.blue;
+  const dark = theme.mode === "dark" ||
+    (theme.mode === "auto" && matchMedia("(prefers-color-scheme: light)").matches === false);
+  const W = "#ffffff", K = "#000000";
+  const v = dark ? {
+    primary: mix(seed, W, 0.55), onPrimary: mix(seed, K, 0.85),
+    primaryContainer: mix(seed, K, 0.72), onPrimaryContainer: mix(seed, W, 0.82),
+    surface: mix("#101216", seed, 0.05), low: mix("#15171c", seed, 0.05),
+    container: mix("#1a1d23", seed, 0.06), high: mix("#23262e", seed, 0.06),
+    highest: mix("#2b2f38", seed, 0.06),
+    onSurface: mix("#e4e6ec", seed, 0.03), onSurfaceVariant: mix("#9aa0ac", seed, 0.06),
+    outline: mix("#3c4048", seed, 0.08), outlineVariant: mix("#2a2d34", seed, 0.06),
+    error: "#f2b8b5",
+  } : {
+    primary: mix(seed, K, 0.22), onPrimary: W,
+    primaryContainer: mix(seed, W, 0.80), onPrimaryContainer: mix(seed, K, 0.80),
+    surface: mix("#f7f8fc", seed, 0.04), low: mix("#f1f2f8", seed, 0.05),
+    container: mix("#e9ebf2", seed, 0.05), high: mix("#e1e3ec", seed, 0.06),
+    highest: mix("#d8dae4", seed, 0.06),
+    onSurface: "#1a1c21", onSurfaceVariant: "#5a5f6a",
+    outline: "#7a7f8a", outlineVariant: "#d4d6df",
+    error: "#b3261e",
+  };
+  const root = document.documentElement.style;
+  const set = (k, val) => root.setProperty(k, val);
+  set("--sc-primary", v.primary); set("--sc-on-primary", v.onPrimary);
+  set("--sc-primary-container", v.primaryContainer);
+  set("--sc-on-primary-container", v.onPrimaryContainer);
+  set("--sc-surface", v.surface); set("--sc-surface-low", v.low);
+  set("--sc-surface-container", v.container); set("--sc-surface-high", v.high);
+  set("--sc-surface-highest", v.highest);
+  set("--sc-on-surface", v.onSurface); set("--sc-on-surface-variant", v.onSurfaceVariant);
+  set("--sc-outline", v.outline); set("--sc-outline-variant", v.outlineVariant);
+  set("--sc-error", v.error);
+  set("--sc-grad", `linear-gradient(140deg, ${hueShift(seed, -14)}, ${hueShift(seed, 26)})`);
+  document.body.classList.toggle("light", !dark);
+  let meta = document.querySelector("meta[name=theme-color]");
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.name = "theme-color";
+    document.head.appendChild(meta);
+  }
+  meta.content = v.surface;
+  renderThemeDialog();
+}
+
+function renderThemeDialog() {
+  const modes = $("#tModes");
+  if (!modes) return;
+  modes.querySelectorAll("button").forEach((b) =>
+    b.classList.toggle("on", b.dataset.mode === theme.mode));
+  const box = $("#tSeeds");
+  box.innerHTML = Object.entries(SEEDS).map(([name, hex]) =>
+    `<button class="swatch${name === theme.seed ? " on" : ""}" data-seed="${name}"
+       style="background:${hex}" title="${name}"><svg><use href="#i-check"/></svg></button>`
+  ).join("");
+  box.querySelectorAll(".swatch").forEach((b) => on(b, "click", () => {
+    theme.seed = b.dataset.seed;
+    localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+    applyTheme();
+  }));
+}
+
+/* ============================================================ state ==== */
 
 const KIND_LABEL = {
-  video: "🎬 Video", audio: "🎵 Audio", image: "🖼️ Image",
-  app: "📦 Software", archive: "🗜️ Archive", document: "📄 Document",
-  other: "⬇️ File",
+  video: "Video", audio: "Audio", image: "Image", app: "Software",
+  archive: "Archive", document: "Document", other: "File", file: "File",
+};
+const QUALITIES = {
+  video: [
+    ["best", "Best", "auto"], ["2160", "4K", "2160p"], ["1440", "2K", "1440p"],
+    ["1080", "1080p", "Full HD"], ["720", "720p", "HD"],
+    ["480", "480p", "SD"], ["360", "360p", "small"],
+  ],
+  audio: [
+    ["m4a", "M4A", "plays everywhere"], ["mp3", "MP3", "most compatible"],
+    ["opus", "Opus", "best size/quality"], ["flac", "FLAC", "lossless · big"],
+    ["best", "Original", "no re-encode"],
+  ],
+  file: [["original", "Original", "exactly as served"]],
 };
 
-let current = null;       // last probe result
+let current = null;          // last probe result
 let chosenKind = "file";
+let chosenQuality = "best";
 let health = null;
+let config = {};
 
-/* ------------------------------------------------------------- health */
+/* ------------------------------------------------------------- health --- */
 
 async function loadHealth() {
-  try {
-    health = await api.get("/api/health");
-  } catch (e) {
-    $("#health").textContent = "server unreachable";
-    $("#health").className = "pill bad";
+  try { health = await driver.health(); }
+  catch (e) {
+    setPill("server unreachable", "bad");
     return;
   }
   const p = health.problems || [];
-  const pill = $("#health");
+  if (p.includes("ytdlp-missing")) setPill("engine missing", "bad");
+  else if (p.includes("ytdlp-stale")) setPill(`yt-dlp ${health.ytdlp} · update it`, "warn");
+  else if (p.length) setPill(`yt-dlp ${health.ytdlp} · needs setup`, "warn");
+  else setPill(`yt-dlp ${health.ytdlp} · ready`, "ok");
+
+  const banner = $("#setupBanner");
   if (p.includes("ytdlp-missing")) {
-    pill.textContent = "yt-dlp missing";
-    pill.className = "pill bad";
+    $("#setupText").textContent = "yt-dlp is missing — almost nothing will download without it.";
+    banner.classList.remove("hidden");
   } else if (p.includes("ytdlp-stale")) {
-    pill.textContent = `yt-dlp ${health.ytdlp} — update it`;
-    pill.className = "pill warn";
-  } else if (p.length) {
-    pill.textContent = `yt-dlp ${health.ytdlp} — needs setup`;
-    pill.className = "pill warn";
+    $("#setupText").textContent = `yt-dlp is ${health.ytdlp_age ?? "many"} days old — that is the #1 cause of failed downloads.`;
+    banner.classList.remove("hidden");
+  } else if (p.includes("ffmpeg-missing")) {
+    $("#setupText").textContent = "ffmpeg is missing — needed for mp3 conversion and merging video+audio.";
+    banner.classList.remove("hidden");
   } else {
-    pill.textContent = `yt-dlp ${health.ytdlp} — ready`;
-    pill.className = "pill ok";
+    banner.classList.add("hidden");
   }
+}
+
+function setPill(text, cls) {
+  const pill = $("#health");
+  pill.textContent = text;
+  pill.className = "pill " + cls;
+  if (!health) return;
   pill.title = [
     `yt-dlp ${health.ytdlp || "?"} (${health.ytdlp_age ?? "?"} days old)`,
     `ffmpeg: ${health.ffmpeg || "MISSING"}`,
@@ -76,76 +242,75 @@ async function loadHealth() {
   ].join("\n");
 }
 
-/* -------------------------------------------------------------- probe */
+/* -------------------------------------------------------------- probe --- */
 
 async function analyze(url) {
   url = (url || "").trim();
   if (!url) return toast("Paste a link first");
-  $("#rTitle").textContent = "Analyzing…";
+
+  $("#result").classList.remove("hidden");
+  $("#result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  $("#rBadge").textContent = "Analyzing";
+  $("#rTitle").textContent = "Reading that link…";
   $("#rSub").textContent = url;
+  $("#rThumb").removeAttribute("src");
   $("#rKinds").innerHTML = "";
   $("#rQuality").innerHTML = "";
-  $("#result").classList.remove("hidden");
-  $("#rThumb").removeAttribute("src");
-  $("#rPlaylist").classList.add("hidden");
   $("#rWarn").classList.add("hidden");
+  $("#rOkWrap").classList.add("hidden");
+  $("#rErrWrap").classList.add("hidden");
+  $("#rPlaylist").classList.add("hidden");
   $("#rDownload").disabled = true;
+  $("#rSize").textContent = "";
 
-  const res = await api.post("/api/probe", { url });
+  let res;
+  try { res = await driver.probe(url); }
+  catch (e) { res = { ok: false, url, error: String(e) }; }
   current = res;
 
   if (!res.ok) {
+    $("#rBadge").textContent = "Problem";
     $("#rTitle").textContent = "Could not read that link";
-    $("#rSub").textContent = res.error || "unknown error";
-    $("#rKinds").innerHTML = res.hint
-      ? `<span class="chip on">💡 ${res.hint}</span>` : "";
+    $("#rSub").textContent = "";
+    $("#rErr").textContent = res.error || "unknown error";
+    $("#rErrHint").textContent = res.hint ? "💡 " + res.hint : "";
+    $("#rErrHint").classList.toggle("hidden", !res.hint);
+    $("#rErrWrap").classList.remove("hidden");
     return;
   }
 
+  chosenKind = res.kind || "file";
+  $("#rBadge").textContent = (KIND_LABEL[chosenKind] || "File") + (res.is_playlist ? " · playlist" : "");
   $("#rTitle").textContent = res.title || url;
   const bits = [];
   if (res.uploader) bits.push(res.uploader);
   if (res.duration) bits.push(fmtDuration(res.duration));
-  if (res.direct) bits.push(`direct ${res.direct.kind} · ${fmtBytes(res.direct.size)}`);
+  if (res.direct) bits.push(`direct ${res.direct.kind} · ${fmtBytes(res.direct.size) || "size ?"}`);
   if (res.is_playlist) bits.push(`${(res.entries || []).length}+ items`);
   $("#rSub").textContent = bits.join("  ·  ") || url;
   if (res.thumb) $("#rThumb").src = res.thumb;
 
-  const warn = $("#rWarn");
-  if (res.note) { warn.textContent = "⚠️ " + res.note; warn.classList.remove("hidden"); }
-  else warn.classList.add("hidden");
+  if (res.note) {
+    $("#rWarn").textContent = "⚠ " + res.note;
+    $("#rWarn").classList.remove("hidden");
+  }
 
-  const kinds = kindsFor(res);
-  $("#rKinds").innerHTML = kinds
-    .map((k) => `<button class="chip${k === res.kind ? " on" : ""}" data-kind="${k}">${KIND_LABEL[k] || k}</button>`)
-    .join("");
-  $("#rKinds").querySelectorAll(".chip").forEach((c) =>
-    c.addEventListener("click", () => {
-      $("#rKinds").querySelectorAll(".chip").forEach((x) => x.classList.remove("on"));
-      c.classList.add("on");
-      chosenKind = c.dataset.kind;
-      fillQualities(chosenKind);
-    })
-  );
-
-  chosenKind = res.kind;
-  fillQualities(chosenKind);
+  buildKindTabs(res);
   $("#rName").value = "";
-  $("#rName").placeholder = cleanName(res.direct?.filename || res.title || "");
+  $("#rName").placeholder = cleanName((res.direct && res.direct.filename) || res.title || "");
   $("#rDownload").disabled = false;
+  $("#rOkWrap").classList.remove("hidden");
 
   if (res.is_playlist) {
     const list = (res.entries || []).slice(0, 25);
-    $("#rPlaylist").innerHTML =
-      `<b>Playlist</b> — every item will be downloaded and numbered in order.` +
-      `<ul>` + list.map((e, i) =>
-        `<li><span class="idx">${String(i + 1).padStart(2, "0")}</span><span>${escapeHtml(e.title || e.url || "")}</span></li>`
-      ).join("") + `</ul>`;
+    $("#rPlaylistList").innerHTML = list.map((e, i) =>
+      `<li><span class="idx">${String(i + 1).padStart(2, "0")}</span><span>${escapeHtml(e.title || e.url || "")}</span></li>`
+    ).join("");
     $("#rPlaylist").classList.remove("hidden");
   }
 }
 
-function kindsFor(res) {
+function buildKindTabs(res) {
   const set = new Set();
   set.add(res.kind || "file");
   const hasVideo = (res.formats || []).some((f) => f.kind === "video");
@@ -154,178 +319,319 @@ function kindsFor(res) {
   if (hasAudio) set.add("audio");
   if (res.direct) set.add(res.direct.kind);
   if (!set.size) set.add("file");
-  return [...set];
+  const kinds = [...set].slice(0, 4);
+  $("#rKinds").innerHTML = kinds.map((k) =>
+    `<button data-kind="${k}" class="${k === chosenKind ? "on" : ""}">${KIND_LABEL[k] || k}</button>`
+  ).join("");
+  $("#rKinds").querySelectorAll("button").forEach((b) => on(b, "click", () => {
+    chosenKind = b.dataset.kind;
+    $("#rKinds").querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    buildQualityChips();
+  }));
+  buildQualityChips();
 }
 
-function fillQualities(kind) {
-  const opts = QUALITIES[kind] || QUALITIES.file;
-  $("#rQuality").innerHTML = opts
-    .map(([v, l]) => `<option value="${v}">${l}</option>`)
-    .join("");
+function chipGroup(kind) {
+  return (kind === "video" || kind === "audio") ? kind : "file";
 }
 
-/* ------------------------------------------------------------ download */
+function buildQualityChips() {
+  const group = chipGroup(chosenKind);
+  let opts = QUALITIES[group];
+  if (group === "video") {
+    const heights = (current.formats || []).filter((f) => f.kind === "video" && f.height).map((f) => f.height);
+    if (heights.length) {
+      const maxH = Math.max(...heights);
+      opts = opts.filter(([v]) => v === "best" || parseInt(v, 10) <= maxH * 1.02);
+    }
+  }
+  if (!opts.some(([v]) => v === chosenQuality)) chosenQuality = opts[0][0];
+  $("#rQuality").innerHTML = opts.map(([v, label, sub]) => {
+    const est = estimateSize(chosenKind, v);
+    return `<button class="qchip${v === chosenQuality ? " on" : ""}" data-q="${v}">
+      <span class="q-label">${label}</span>
+      <span class="q-sub">${sub}${est ? " · ~" + fmtBytes(est) : ""}</span>
+    </button>`;
+  }).join("");
+  $("#rQuality").querySelectorAll(".qchip").forEach((c) => on(c, "click", () => {
+    chosenQuality = c.dataset.q;
+    $("#rQuality").querySelectorAll(".qchip").forEach((x) => x.classList.toggle("on", x === c));
+    updateSizeHint();
+  }));
+  updateSizeHint();
+}
+
+/* Best-effort size estimate from probed formats. */
+function estimateSize(kind, q) {
+  if (!current || !current.formats || !current.duration) {
+    if (current && current.direct && current.direct.size) return current.direct.size;
+    return null;
+  }
+  const dur = current.duration;
+  const fmts = current.formats;
+  const vids = fmts.filter((f) => f.kind === "video");
+  const auds = fmts.filter((f) => f.kind === "audio");
+  const sizeOf = (f) => f.size || (f.tbr ? (f.tbr * 1000 / 8) * dur : null);
+  if (currKindIsAudio(kind)) {
+    const a = auds[auds.length - 1];
+    return a ? sizeOf(a) : null;
+  }
+  if (kind !== "video") return null;
+  let pool = vids;
+  if (q !== "best") {
+    const h = parseInt(q, 10);
+    const under = vids.filter((f) => f.height && f.height <= h);
+    if (under.length) pool = under;
+  }
+  const bestV = pool[pool.length - 1];
+  const bestA = auds[auds.length - 1];
+  const vs = bestV ? sizeOf(bestV) : null, as = bestA ? sizeOf(bestA) : null;
+  return vs || as ? (vs || 0) + (as || 0) : null;
+}
+function currKindIsAudio(k) { return k === "audio"; }
+
+function updateSizeHint() {
+  const est = estimateSize(chosenKind, chosenQuality);
+  const dir = (config.download_dir || "").split(/[\\/]/).filter(Boolean).pop();
+  $("#rSize").textContent = est ? `~${fmtBytes(est)}${dir ? " → " + dir : ""}` : (dir ? `saving to ${dir}` : "");
+}
+
+/* ----------------------------------------------------------- download --- */
 
 async function startDownload() {
   if (!current || !current.url) return;
+  maybeAskNotify();
   const body = {
     url: current.url,
     kind: chosenKind,
-    quality: $("#rQuality").value,
+    quality: chosenQuality,
     playlist: !!current.is_playlist,
     filename: $("#rName").value.trim() || null,
   };
-  const res = await api.post("/api/download", body);
+  if ($("#rCookies").checked) body.cookies = config.cookies_browser || "chrome";
+  let res;
+  try { res = await driver.download(body); }
+  catch (e) { return toast(String(e)); }
   if (res.job) {
-    toast(`Added: ${KIND_LABEL[chosenKind] || chosenKind}`);
+    toast(`Queued · ${KIND_LABEL[chosenKind] || chosenKind}`);
     $("#result").classList.add("hidden");
     $("#url").value = "";
-    refreshJobs();
+    refreshJobs(true);
   } else {
     toast(res.error || "could not start the download");
   }
 }
 
-/* ---------------------------------------------------------------- jobs */
+/* --------------------------------------------------------------- jobs --- */
 
 let lastJobState = "";
+const notified = new Set();
 
-async function refreshJobs() {
+async function refreshJobs(force) {
   let data;
-  try {
-    data = await api.get("/api/jobs");
-  } catch (e) {
-    return;
-  }
+  try { data = await driver.jobs(); } catch (e) { return; }
   const jobs = (data.jobs || []).slice().reverse();
-  const key = JSON.stringify(jobs.map((j) => [j.id, j.status, j.percent, j.filename]));
-  if (key === lastJobState) return;
+  const key = JSON.stringify(jobs.map((j) => [j.id, j.status, j.percent, j.filename, j.attempt]));
+  if (!force && key === lastJobState) return;
   const hadRunning = lastJobState.includes('"running"');
   lastJobState = key;
 
   const box = $("#jobs");
   if (!jobs.length) {
-    box.innerHTML = `<p class="empty">Nothing downloading yet.</p>`;
+    box.innerHTML = `<div class="empty">Nothing downloading yet.<br>Paste a link above — it shows up here with live progress.</div>`;
   } else {
     box.innerHTML = jobs.map(jobCard).join("");
     box.querySelectorAll("[data-cancel]").forEach((b) =>
-      b.addEventListener("click", () => api.post(`/api/jobs/${b.dataset.cancel}/cancel`)));
-    box.querySelectorAll("[data-open]").forEach((b) =>
-      b.addEventListener("click", () => api.post("/api/files/open", { path: b.dataset.open, action: "reveal" })));
+      on(b, "click", async () => { await driver.cancel(b.dataset.cancel); refreshJobs(true); }));
+    box.querySelectorAll("[data-show]").forEach((b) =>
+      on(b, "click", () => driver.fileAction(b.dataset.show, "reveal")));
+    box.querySelectorAll("[data-play]").forEach((b) =>
+      on(b, "click", () => driver.fileAction(b.dataset.play, "open")));
   }
+  jobs.forEach((j) => {
+    if (j.status === "done" && !notified.has(j.id)) {
+      notified.add(j.id);
+      notifyDone(j);
+    }
+  });
   if (hadRunning && !jobs.some((j) => j.status === "running")) loadFiles();
 }
 
 function jobCard(j) {
-  const cls = j.status === "done" ? "done" : j.status === "error" ? "error" : "";
+  const cls = j.status === "done" ? "done" : (j.status === "error" || j.status === "canceled") ? "error" : "";
   const pct = j.percent ? `${j.percent.toFixed(0)}%` : "";
-  const speed = j.speed ? `${fmtBytes(j.speed)}/s` : "";
-  const eta = j.eta ? `· ${j.eta}s left` : "";
-  const items = j.items_total ? ` · item ${j.items_done || 1}/${j.items_total}` : "";
+  const parts = [];
+  if (j.speed) parts.push(`${fmtBytes(j.speed)}/s`);
+  if (j.eta) parts.push(`${j.eta}s left`);
+  if (j.items_total) parts.push(`item ${j.items_done || 1}/${j.items_total}`);
+  if (j.attempts_total > 1) parts.push(`attempt ${j.attempt}/${j.attempts_total}`);
   return `
   <div class="job ${cls}">
     <div class="job-top">
-      <div class="job-title">${escapeHtml(j.filename || j.title || j.url)}</div>
+      <div class="job-title" title="${escapeAttr(j.filename || j.title || j.url)}">${escapeHtml(j.filename || j.title || j.url)}</div>
       <div class="job-actions">
-        ${j.status === "running" ? `<button data-cancel="${j.id}">stop</button>` : ""}
-        ${j.status === "done" && j.path ? `<button data-open="${escapeAttr(j.path)}">show</button>` : ""}
+        ${j.status === "running" || j.status === "queued" ? `<button class="icon-btn" data-cancel="${j.id}" title="Stop"><svg><use href="#i-close"/></svg></button>` : ""}
+        ${j.status === "done" && j.path ? `<button class="icon-btn" data-play="${escapeAttr(j.path)}" title="Play / open"><svg><use href="#i-play"/></svg></button>
+          <button class="icon-btn" data-show="${escapeAttr(j.path)}" title="Show in folder"><svg><use href="#i-folder"/></svg></button>` : ""}
       </div>
     </div>
-    <div class="job-sub">${j.status}${pct ? " · " + pct : ""} ${speed} ${eta}${items}
-      ${j.attempts_total > 1 ? ` · attempt ${j.attempt}/${j.attempts_total}` : ""}</div>
+    <div class="job-sub"><span class="job-status">${j.status}</span>${pct ? " · " + pct : ""}${parts.length ? " · " + parts.join(" · ") : ""}</div>
     <div class="bar"><i style="width:${j.percent || 0}%"></i></div>
-    ${j.status === "error" ? `<div class="err">${escapeHtml(j.error || "failed")}</div>` : ""}
+    ${j.status === "error" && j.error ? `<div class="err">${escapeHtml(j.error)}</div>` : ""}
     ${j.hint ? `<div class="hint">💡 ${escapeHtml(j.hint)}</div>` : ""}
   </div>`;
 }
 
-/* --------------------------------------------------------------- files */
+/* --------------------------------------------------------------- files -- */
 
 async function loadFiles() {
   let data;
-  try {
-    data = await api.get("/api/files");
-  } catch (e) {
-    return;
-  }
+  try { data = await driver.files(); } catch (e) { return; }
   const box = $("#files");
   const list = data.files || [];
+  const dir = data.dir || "";
+  $("#dirName").textContent = dir.split(/[\\/]/).filter(Boolean).pop() || dir || "—";
+  $("#dirChip").title = dir;
   if (!list.length) {
-    box.innerHTML = `<p class="empty">Nothing here yet — folder: ${escapeHtml(data.dir || "")}</p>`;
+    box.innerHTML = `<div class="empty">Nothing here yet — finished files land in<br><b>${escapeHtml(dir)}</b></div>`;
     return;
   }
   box.innerHTML = list.map((f) => `
     <div class="file">
       <span class="ico">${f.icon}</span>
       <div class="meta">
-        <div class="name">${escapeHtml(f.name)}</div>
+        <div class="name" title="${escapeAttr(f.path)}">${escapeHtml(f.name)}</div>
         <div class="sub">${f.size_h} · ${new Date(f.mtime * 1000).toLocaleString()}</div>
       </div>
       <div class="acts">
-        <button data-open="${escapeAttr(f.path)}">open</button>
-        <button data-reveal="${escapeAttr(f.path)}">📂</button>
-        <button data-del="${escapeAttr(f.path)}">🗑</button>
+        <button class="icon-btn" data-open="${escapeAttr(f.path)}" title="Open"><svg><use href="#i-play"/></svg></button>
+        <button class="icon-btn" data-reveal="${escapeAttr(f.path)}" title="Show in folder"><svg><use href="#i-folder"/></svg></button>
+        <button class="icon-btn danger" data-del="${escapeAttr(f.path)}" title="Delete"><svg><use href="#i-trash"/></svg></button>
       </div>
     </div>`).join("");
   box.querySelectorAll("[data-open]").forEach((b) =>
-    b.addEventListener("click", () => api.post("/api/files/open", { path: b.dataset.open, action: "open" })));
+    on(b, "click", () => driver.fileAction(b.dataset.open, "open")));
   box.querySelectorAll("[data-reveal]").forEach((b) =>
-    b.addEventListener("click", () => api.post("/api/files/open", { path: b.dataset.reveal, action: "reveal" })));
+    on(b, "click", () => driver.fileAction(b.dataset.reveal, "reveal")));
   box.querySelectorAll("[data-del]").forEach((b) =>
-    b.addEventListener("click", async () => {
+    on(b, "click", async () => {
       if (!confirm("Delete this file?")) return;
-      await api.post("/api/files/open", { path: b.dataset.del, action: "delete" });
+      await driver.fileAction(b.dataset.del, "delete");
       loadFiles();
     }));
+  loadConfigOnce();
 }
 
-/* ------------------------------------------------------------ settings */
+let configLoaded = false;
+async function loadConfigOnce() {
+  if (configLoaded) return;
+  configLoaded = true;
+  try { config = await driver.getConfig(); } catch (e) {}
+}
+
+/* ------------------------------------------------------------ settings -- */
 
 async function openSettings() {
-  const cfg = await api.get("/api/config");
-  $("#sDir").value = cfg.download_dir || "";
-  $("#sConc").value = cfg.concurrency || 2;
-  $("#sCookies").value = cfg.cookies_browser || "";
-  $("#sClip").checked = !!cfg.watch_clipboard;
-  const h = await api.get("/api/health");
+  config = await driver.getConfig();
+  $("#sDir").value = config.download_dir || "";
+  $("#sConc").value = String(config.concurrency || 2);
+  $("#sCookies").value = config.cookies_browser || "";
+  $("#sClip").checked = !!config.watch_clipboard;
+  if (driver.pickFolder) $("#sBrowse").classList.remove("hidden");
+  const h = await driver.health();
   $("#sHealth").textContent = [
-    `yt-dlp     ${h.ytdlp || "MISSING"}  (${h.ytdlp_age ?? "?"} days old)`,
-    `ffmpeg     ${h.ffmpeg || "MISSING"}`,
-    `JS runtime ${h.js_runtime || "MISSING"} ${h.js_path || ""}`.trim(),
-    `folder     ${h.download_dir}`,
-    "",
-    `Update:    ${h.update_hint}`,
-  ].join("\n");
-  $("#settings").classList.remove("hidden");
+    `yt-dlp      ${h.ytdlp || "MISSING"}  (${h.ytdlp_age ?? "?"} days old)`,
+    `ffmpeg      ${h.ffmpeg || "MISSING"}`,
+    `JS runtime  ${h.js_runtime || "MISSING"} ${h.js_path || ""}`.trim(),
+    `folder      ${h.download_dir}`,
+    ``,
+    h.pot_provider ? `POT plugin  ${h.pot_provider}` : null,
+    `update      ${h.update_hint}`,
+  ].filter((l) => l !== null).join("\n");
+  openDlg("settings");
 }
 
 async function saveSettings() {
-  await api.post("/api/config", {
+  await driver.setConfig({
     download_dir: $("#sDir").value.trim(),
     concurrency: Math.max(1, parseInt($("#sConc").value || "2", 10)),
     cookies_browser: $("#sCookies").value,
     watch_clipboard: $("#sClip").checked,
   });
-  $("#settings").classList.add("hidden");
+  closeDlg("settings");
   toast("Settings saved");
   loadHealth();
   loadFiles();
 }
 
-/* ------------------------------------------------------------ clipboard */
+/* ----------------------------------------------------- extension guide -- */
 
-async function pollClipboard() {
-  try {
-    const d = await api.get("/api/clipboard");
-    if (d.item && d.item.url) {
-      $("#clipUrl").textContent = d.item.url.slice(0, 64) + (d.item.url.length > 64 ? "…" : "");
-      $("#clipHint").classList.remove("hidden");
-      $("#clipHint").dataset.url = d.item.url;
-    }
-  } catch (e) { /* server may be restarting */ }
+const EXT_STEPS = {
+  chrome: [
+    `Open <code>chrome://extensions</code> (Edge: <code>edge://extensions</code>, Brave: <code>brave://extensions</code>).`,
+    `Turn on <b>Developer mode</b> (top right).`,
+    `Click <b>Load unpacked</b> and choose the <b>extension</b> folder from your GrabBox download/repo.`,
+    `Keep the GrabBox app running — that is where downloads happen.`,
+  ],
+  firefox: [
+    `Open <code>about:debugging#/runtime/this-firefox</code>.`,
+    `Click <b>Load Temporary Add-on…</b> and pick <b>manifest.json</b> inside the <b>extension</b> folder.`,
+    `Firefox unloads temporary add-ons on restart — reloading takes one click.`,
+    `Keep the GrabBox app running — that is where downloads happen.`,
+  ],
+};
+
+function openExtensionGuide() {
+  const tabs = $("#extBrowserTabs");
+  const paint = (which) => {
+    tabs.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.b === which));
+    $("#extSteps").innerHTML = EXT_STEPS[which].map((s) => `<li>${s}</li>`).join("");
+  };
+  tabs.querySelectorAll("button").forEach((b) => on(b, "click", () => paint(b.dataset.b)));
+  paint("chrome");
+  if (driver.openExtensionFolder) $("#extOpenFolder").classList.remove("hidden");
+  openDlg("extDlg");
 }
 
-/* ------------------------------------------------------------- helpers */
+/* ----------------------------------------------------------- clipboard -- */
+
+async function pollClipboard() {
+  let d;
+  try { d = await driver.clipboard(); } catch (e) { return; }
+  if (d.item && d.item.url) {
+    const u = d.item.url;
+    $("#clipUrl").textContent = u.length > 56 ? u.slice(0, 53) + "…" : u;
+    const hint = $("#clipHint");
+    hint.classList.remove("hidden");
+    hint.dataset.url = u;
+  }
+}
+
+/* ------------------------------------------------------- notifications -- */
+
+function maybeAskNotify() {
+  try {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  } catch (e) {}
+}
+function notifyDone(job) {
+  try {
+    toast(`Done · ${job.filename || job.title}`);
+    if (driver.name === "tauri") return; // Rust sends the OS notification
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    if (!document.hidden) return;
+    new Notification("GrabBox — download complete", { body: job.filename || job.title || "" });
+  } catch (e) {}
+}
+
+/* ------------------------------------------------------------- dialogs -- */
+
+function openDlg(id) { $("#" + id).classList.remove("hidden"); }
+function closeDlg(id) { $("#" + id).classList.add("hidden"); }
+
+/* ------------------------------------------------------------- helpers -- */
 
 function fmtBytes(n) {
   if (!n) return "";
@@ -336,8 +642,9 @@ function fmtBytes(n) {
 }
 function fmtDuration(s) {
   s = Math.round(s);
-  const m = Math.floor(s / 60);
-  return `${m}:${String(s % 60).padStart(2, "0")}`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  const sec = String(s % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
 }
 function cleanName(s) {
   return (s || "").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
@@ -348,6 +655,31 @@ function escapeHtml(s) {
 }
 function escapeAttr(s) { return escapeHtml(s).replace(/`/g, "&#96;"); }
 
+/* ------------------------------------------------------------ feedback -- */
+
+const FEEDBACK_EMAIL = "feedit18@gmail.com";
+
+function sendFeedback() {
+  const h = health || {};
+  const subject = `GrabBox feedback (app ${h.app || "?"})`;
+  const body = [
+    "Hi! GrabBox feedback:",
+    "",
+    "",
+    "",
+    "----",
+    `(auto-included: app ${h.app || "?"} · ${h.platform || "?"} · yt-dlp ${h.ytdlp || "?"} · js ${h.js_runtime || "?"})`,
+  ].join("\n");
+  const href = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const tauri = window.__TAURI__;
+  if (tauri && tauri.opener && typeof tauri.opener.openUrl === "function") {
+    tauri.opener.openUrl(href).catch(() => { location.href = href; });
+  } else {
+    location.href = href;
+  }
+  toast("Opening your mail app…");
+}
+
 let toastTimer = null;
 function toast(msg) {
   const el = $("#toast");
@@ -357,38 +689,120 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.add("hidden"), 2600);
 }
 
-/* ---------------------------------------------------------------- init */
+/* --------------------------------------------------------- drag & drop -- */
+
+function setupDragDrop() {
+  let depth = 0;
+  const overlay = $("#dropOverlay");
+  window.addEventListener("dragenter", (e) => {
+    if (![...(e.dataTransfer ? e.dataTransfer.types : [])].some((t) => t.includes("text"))) return;
+    depth++;
+    overlay.classList.remove("hidden");
+  });
+  window.addEventListener("dragleave", () => {
+    depth = Math.max(0, depth - 1);
+    if (!depth) overlay.classList.add("hidden");
+  });
+  window.addEventListener("dragover", (e) => e.preventDefault());
+  window.addEventListener("drop", (e) => {
+    e.preventDefault();
+    depth = 0;
+    overlay.classList.add("hidden");
+    const text = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain") || "";
+    const url = text.split("\n").map((l) => l.trim()).find((l) => /^https?:\/\//.test(l));
+    if (url) {
+      $("#url").value = url;
+      analyze(url);
+    } else {
+      toast("That did not look like a link");
+    }
+  });
+}
+
+/* ---------------------------------------------------------------- init -- */
 
 document.addEventListener("DOMContentLoaded", () => {
+  applyTheme();
+  matchMedia("(prefers-color-scheme: light)").addEventListener?.("change", applyTheme);
+
   loadHealth();
   loadFiles();
-  refreshJobs();
+  refreshJobs(true);
   setInterval(refreshJobs, 1000);
   setInterval(loadFiles, 5000);
   setInterval(pollClipboard, 1500);
 
-  $("#go").addEventListener("click", () => analyze($("#url").value));
-  $("#url").addEventListener("keydown", (e) => { if (e.key === "Enter") analyze($("#url").value); });
-  $("#url").addEventListener("paste", () => setTimeout(() => analyze($("#url").value), 60));
-  $("#rDownload").addEventListener("click", startDownload);
-  $("#clearJobs").addEventListener("click", async () => { await api.post("/api/jobs/clear"); lastJobState = ""; refreshJobs(); });
-  $("#openDir").addEventListener("click", () => api.post("/api/files/open", { action: "reveal" }));
-  $("#settingsBtn").addEventListener("click", openSettings);
-  $("#sSave").addEventListener("click", saveSettings);
-  $("#sClose").addEventListener("click", () => $("#settings").classList.add("hidden"));
-  $("#useClip").addEventListener("click", () => {
+  on($("#go"), "click", () => analyze($("#url").value));
+  on($("#url"), "keydown", (e) => { if (e.key === "Enter") analyze($("#url").value); });
+  on($("#url"), "paste", () => setTimeout(() => analyze($("#url").value), 60));
+  on($("#rDownload"), "click", startDownload);
+  on($("#rClose"), "click", () => $("#result").classList.add("hidden"));
+  on($("#clearJobs"), "click", async () => { await driver.clearJobs(); lastJobState = ""; refreshJobs(true); });
+  on($("#openDir"), "click", () => driver.fileAction(null, "reveal"));
+  on($("#settingsBtn"), "click", openSettings);
+  on($("#health"), "click", openSettings);
+  on($("#setupGo"), "click", openSettings);
+  on($("#sSave"), "click", saveSettings);
+  on($("#themeBtn"), "click", () => { renderThemeDialog(); openDlg("themeDlg"); });
+  on($("#feedbackBtn"), "click", sendFeedback);
+  on($("#sFeedback"), "click", sendFeedback);
+  on($("#sExtension"), "click", openExtensionGuide);
+  on($("#sUpdate"), "click", async () => {
+    const r = await driver.updateYtdlp();
+    toast(r.hint ? "Run: " + r.hint : (r.ok ? "Updated" : "Update failed"));
+    loadHealth();
+  });
+  on($("#extOpenFolder"), "click", () => driver.openExtensionFolder && driver.openExtensionFolder());
+  on($("#sBrowse"), "click", async () => {
+    if (!driver.pickFolder) return;
+    const dir = await driver.pickFolder();
+    if (dir) $("#sDir").value = dir;
+  });
+  on($("#clipHint"), "click", () => {
     const u = $("#clipHint").dataset.url;
+    if (!u) return;
     $("#clipHint").classList.add("hidden");
     $("#url").value = u;
     analyze(u);
   });
+  on($("#tModes"), "click", (e) => {
+    const b = e.target.closest("button[data-mode]");
+    if (!b) return;
+    theme.mode = b.dataset.mode;
+    localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+    applyTheme();
+  });
 
-  // The browser extension just opens /?url=... — no CORS needed.
+  document.querySelectorAll(".scrim").forEach((scrim) =>
+    on(scrim, "click", (e) => { if (e.target === scrim) scrim.classList.add("hidden"); }));
+  document.querySelectorAll("[data-close]").forEach((b) =>
+    on(b, "click", () => closeDlg(b.dataset.close)));
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    document.querySelectorAll(".scrim").forEach((s) => s.classList.add("hidden"));
+  });
+
+  setupDragDrop();
+
+  // The browser extension opens /?url=... — keep that entry point working.
   const q = new URLSearchParams(location.search);
   const urlParam = q.get("url") || q.get("u");
   if (urlParam) {
     $("#url").value = urlParam;
     analyze(urlParam);
     history.replaceState({}, "", location.pathname);
+  }
+
+  // Tauri: links forwarded into a running app (CLI arg / second instance).
+  if (driver.takePendingUrl) {
+    driver.takePendingUrl().then((r) => {
+      const u = r && r.url;
+      if (u) { $("#url").value = u; analyze(u); }
+    }).catch(() => {});
+  }
+  if (driver.onGrabUrl) {
+    driver.onGrabUrl((u) => {
+      if (u && typeof u === "string") { $("#url").value = u; analyze(u); }
+    });
   }
 });
