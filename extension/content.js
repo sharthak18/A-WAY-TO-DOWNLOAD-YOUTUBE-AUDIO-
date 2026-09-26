@@ -78,7 +78,7 @@
       display: block; margin: 0 0 4px 2px; font-weight: 600; }
     .dl {
       border: 0; border-radius: 11px; cursor: pointer; padding: 11px;
-      background: linear-gradient(140deg, #4f8cff, #8b5cf6);
+      background: linear-gradient(140deg, #6e74ff, #8e5ef4);
       color: #fff; font-size: 14px; font-weight: 650;
     }
     .dl:hover { filter: brightness(1.1); }

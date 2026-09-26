@@ -445,9 +445,16 @@ impl Engine {
             "GBX|%(progress.percent|0)s|%(progress.speed|0)s|%(progress.eta|0)s|%(progress.filename)s".into(),
             "-P".into(),
             outdir.to_string_lossy().into_owned(),
-            "--windows-filenames".into(),
             "--embed-metadata".into(),
         ];
+        // Only on Windows. Everywhere else the flag costs us the real filename:
+        // yt-dlp then replaces every non-ASCII character and every space with
+        // "_", so "My Song" becomes "My_Song" and a non-Latin title becomes a
+        // row of underscores. macOS and Linux have none of the restrictions it
+        // exists to work around.
+        if cfg!(windows) {
+            args.push("--windows-filenames".into());
+        }
 
         let outtmpl = if let Some(name) = filename.filter(|s| !s.is_empty()) {
             format!("{}.%(ext)s", sanitize_filename(name))

@@ -157,7 +157,9 @@ class DownloadService : Service() {
 
     private fun stopIfIdle() {
         if (running.isEmpty()) {
-            stopForeground(STOP_FOREGROUND_DETACH)
+            // REMOVE, not DETACH: DETACH leaves the "Getting ready…" progress
+            // notification stranded in the shade next to the done/failed one.
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
@@ -192,7 +194,7 @@ class DownloadService : Service() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         return NotificationCompat.Builder(this, GrabBoxApp.CHANNEL_DOWNLOADS)
-            .setSmallIcon(R.drawable.ic_launcher_fg)
+            .setSmallIcon(R.drawable.ic_stat_grabbox)
             .setContentTitle(title)
             .setContentText(text)
             .setOnlyAlertOnce(true)
@@ -217,7 +219,7 @@ class DownloadService : Service() {
     private fun notifyDone(jobId: String) {
         val job = JobStore.get(jobId) ?: return
         val n = NotificationCompat.Builder(this, GrabBoxApp.CHANNEL_DOWNLOADS)
-            .setSmallIcon(R.drawable.ic_launcher_fg)
+            .setSmallIcon(R.drawable.ic_stat_grabbox)
             .setContentTitle("Download complete")
             .setContentText(job.filename ?: job.title)
             .setAutoCancel(true)
@@ -228,7 +230,7 @@ class DownloadService : Service() {
 
     private fun notifyFailed(jobId: String, error: String) {
         val n = NotificationCompat.Builder(this, GrabBoxApp.CHANNEL_DOWNLOADS)
-            .setSmallIcon(R.drawable.ic_launcher_fg)
+            .setSmallIcon(R.drawable.ic_stat_grabbox)
             .setContentTitle("Download failed")
             .setContentText(error.take(120))
             .setAutoCancel(true)

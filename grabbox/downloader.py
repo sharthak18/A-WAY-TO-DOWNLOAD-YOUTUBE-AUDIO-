@@ -214,7 +214,10 @@ class Manager(object):
             "paths": {"home": outdir},
             "outtmpl": {"default": outtmpl},
             "restrictfilenames": False,
-            "windowsfilenames": True,
+            # Windows only - elsewhere it replaces every non-ASCII character
+            # and every space with "_", mangling real titles into My_Song and
+            # non-Latin ones into a row of underscores.
+            "windowsfilenames": os.name == "nt",
             "noplaylist": not playlist,
             "ignoreerrors": "only_download" if playlist else False,
             "quiet": True,
