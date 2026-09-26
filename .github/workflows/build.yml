@@ -71,11 +71,11 @@ jobs:
           {
             echo "### `gradle assembleDebug` exited $status"
             echo '```'
-            grep -nE "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|^> |AAPT|Execution failed|Unresolved reference|Cannot find" \
+            grep -nE "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|AAPT|Execution failed|Unresolved reference|Cannot find|Unsupported|expected" \
               /tmp/gradle.log | head -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          grep -E "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|^> |Execution failed|Unresolved reference|Cannot find" \
+          grep -E "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|AAPT|Execution failed|Unresolved reference|Cannot find|Unsupported|expected" \
             /tmp/gradle.log | head -25 \
             | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
             | while IFS= read -r line; do
