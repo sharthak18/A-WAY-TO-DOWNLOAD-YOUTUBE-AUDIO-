@@ -83,6 +83,52 @@ jobs:
               done
           exit $status
 
+      # The whole Android app depends on this one property: youtubedl-android
+      # reads libpython.zip.so out of nativeLibraryDir, and PackageManager
+      # only populates that directory by *extracting* the .so files from the
+      # APK. If the entries are stored uncompressed the OS maps them straight
+      # out of the archive and the directory stays empty, which is exactly
+      # how "failed to initialize" happened. Assert it instead of assuming it.
+      - name: Verify the engine payload is extractable
+        working-directory: android
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/debug/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no APK produced"; exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            echo "--- $(basename "$apk")"
+            python3 - "$apk" <<'PY'
+          import os, sys, zipfile
+          apk = sys.argv[1]
+          wanted = ("libpython.zip.so", "libpython.so", "libffmpeg.so")
+          z = zipfile.ZipFile(apk)
+          found, stored, missing = set(), [], []
+          for name in z.namelist():
+              base = os.path.basename(name)
+              if base in wanted and base not in found:
+                  found.add(base)
+                  info = z.getinfo(name)
+                  method = "deflated" if info.compress_type == zipfile.ZIP_DEFLATED else "STORED"
+                  print("    %-22s %-8s %8d bytes  %s" % (base, method, info.file_size, name))
+                  if info.compress_type == zipfile.ZIP_STORED:
+                      stored.append(base)
+          missing = [w for w in wanted if w not in found]
+          for m in missing:
+              print("    %-22s MISSING" % m)
+          if missing:
+              print("::error::engine payload missing from %s: %s" % (apk, ", ".join(missing)))
+          if stored:
+              print("::error::%s stores these uncompressed, so PackageManager "
+                    "will NOT extract them and nativeLibraryDir stays empty: %s"
+                    % (apk, ", ".join(stored)))
+          sys.exit(1 if (missing or stored) else 0)
+          PY
+          done
+          echo "all APKs carry a compressed, extractable engine"
+
       - uses: actions/upload-artifact@v7
         with:
           name: GrabBox-Android
