@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <!-- Files shared via "Open" from the Downloads list. -->
-    <external-path name="downloads" path="Download/GrabBox/" />
+    <!-- Settings offers Downloads, Downloads/GrabBox, Music/GrabBox and
+         Movies/GrabBox; every one of them has to be shareable, or tapping
+         "Open" on a job from those folders fails in FileProvider. -->
+    <external-path name="downloads" path="Download/" />
+    <external-path name="music" path="Music/" />
+    <external-path name="movies" path="Movies/" />
     <files-path name="internal" path="downloads/" />
     <external-files-path name="appfiles" path="." />
 </paths>

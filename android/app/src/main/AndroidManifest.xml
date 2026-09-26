@@ -14,8 +14,13 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- youtubedl-android's requirement: the bundled Python + ffmpeg binaries
+         ship as jniLibs and init() reads them from nativeLibraryDir, so they
+         must be extracted at install time. Kept in sync with
+         packaging { jniLibs { useLegacyPackaging = true } } in build.gradle.kts. -->
     <application
         android:name=".GrabBoxApp"
+        android:extractNativeLibs="true"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"

@@ -41,6 +41,17 @@ android {
         buildConfig = true
     }
 
+    // The engine reads libpython.zip.so / libffmpeg.so straight out of
+    // nativeLibraryDir during init(). AGP 8 stores .so files uncompressed and
+    // skips the install-time extraction, so that directory comes up empty and
+    // init() dies with a bare "failed to initialize". Legacy packaging puts
+    // them back on disk where the engine can find them.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     // One APK per ABI: the bundled Python/ffmpeg binaries are big, so nobody
     // downloads 3x what their phone needs.
     splits {

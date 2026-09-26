@@ -184,6 +184,67 @@ go and tells you which of the above apply to you.
 
 ---
 
+## Android: "Engine failed to start — failed to initialize"
+
+The app opens fine, but the red banner is already there and the **Grab**
+button is greyed out. Nothing about the phone is wrong: the engine is
+yt-dlp plus a Python runtime, both shipped inside the APK as native
+libraries, and the app has to unpack them before it can run anything.
+
+### What is actually happening
+
+`youtubedl-android` stores the Python runtime as `libpython.zip.so` and
+ffmpeg as `libffmpeg.so`, and during `init()` it reads them straight out of
+`ApplicationInfo.nativeLibraryDir`. If the APK stored those `.so` files
+*uncompressed* — which is what Android Gradle Plugin 8 does by default —
+the installer never extracts them, `nativeLibraryDir` is empty on disk,
+and `init()` throws. The library catches it and rethrows a bare
+`failed to initialize`, which is the whole message the app ever had to show.
+
+The library's README lists this as a required app-side setting; GrabBox had
+it missing.
+
+### Fix — build with extracted native libs
+
+`android/app/build.gradle.kts`:
+
+```kotlin
+android {
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+}
+```
+
+and, to keep it enforced no matter what a future plugin does, in
+`android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<application
+    android:extractNativeLibs="true"
+    ... >
+```
+
+Either one is enough on its own; the app ships both.
+
+### Checking it worked
+
+```bash
+# inside the APK: the payload is there either way
+unzip -l app-arm64-v8a-debug.apk | grep libpython
+
+# on the device, after install: this is what actually matters
+adb shell run-as app.grabbox ls /data/app/*/app.grabbox*/lib/arm64
+```
+
+If that listing is empty, the fix is not in the build yet. The app banner
+prints the real cause chain underneath the generic line, and **Retry**
+re-runs the boot without reinstalling.
+
+---
+
 ## Two honest notes
 
 **MP3 is a re-encode.** YouTube only ever serves lossy audio (opus or aac).

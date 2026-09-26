@@ -1,7 +1,6 @@
 package app.grabbox.work
 
 import com.yausername.youtubedl_android.YoutubeDL
-import com.yausername.youtubedl_android.YoutubeDLException
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import org.json.JSONObject
 import java.io.File
@@ -184,7 +183,11 @@ object Engine {
         request.addOption("--fragment-retries", "10")
         request.addOption("--paths", "home:${outDir.absolutePath}")
         request.addOption("-o", template)
-        request.addOption("--windows-filenames")
+        // No --windows-filenames here: it makes yt-dlp replace every
+        // non-ASCII character *and* every space with "_", so a title like
+        // "My Song" lands as "My_Song" and a Bangla or Japanese one becomes a
+        // row of underscores. Android's filesystem has none of the Windows
+        // restrictions that flag exists for.
         request.addOption("--embed-metadata")
         if (playlist) {
             request.addOption("--yes-playlist")

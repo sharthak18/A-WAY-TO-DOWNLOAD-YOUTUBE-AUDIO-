@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.grabbox.GrabBoxApp
 import app.grabbox.GrabViewModel
 import app.grabbox.work.Engine
 import app.grabbox.work.JobStore
@@ -67,10 +68,11 @@ private val DoneGreen = Color(0xFF7BD88F)
 @Composable
 fun HomeScreen(
     viewModel: GrabViewModel,
-    engineOk: Boolean,
-    engineError: String?,
+    engineState: GrabBoxApp.EngineState,
+    onRetryEngine: () -> Unit,
 ) {
     val context = LocalContext.current
+    val engineOk = engineState.ready
     val jobs by viewModel.jobs.collectAsState()
     val snackbar = remember { SnackbarHostState() }
 
@@ -105,11 +107,22 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            if (!engineOk) {
-                item {
+            when {
+                engineState.starting -> item {
                     BannerCard(
-                        "Engine failed to start",
-                        engineError ?: "yt-dlp could not unpack on this device. Reinstall the APK.",
+                        title = "Starting the engine…",
+                        body = "Unpacking yt-dlp and its Python runtime. " +
+                            "This only takes a moment, and only on first launch.",
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
+                }
+                !engineOk -> item {
+                    BannerCard(
+                        title = "Engine failed to start",
+                        body = engineState.error
+                            ?: "yt-dlp could not unpack on this device. Reinstall the APK.",
+                        action = { TextButton(onClick = onRetryEngine) { Text("Retry") } },
                     )
                 }
             }
@@ -189,18 +202,27 @@ fun HomeScreen(
 }
 
 @Composable
-private fun BannerCard(title: String, body: String, hint: String? = null) {
+private fun BannerCard(
+    title: String,
+    body: String,
+    hint: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.errorContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onErrorContainer,
+    action: (@Composable () -> Unit)? = null,
+) {
     Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
+        color = containerColor,
+        contentColor = contentColor,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onErrorContainer)
-            Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+            Text(title, fontWeight = FontWeight.SemiBold, color = contentColor)
+            Text(body, style = MaterialTheme.typography.bodySmall, color = contentColor)
             hint?.let {
                 Text("💡 $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
             }
+            action?.invoke()
         }
     }
 }

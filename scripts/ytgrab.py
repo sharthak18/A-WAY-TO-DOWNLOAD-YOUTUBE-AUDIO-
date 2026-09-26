@@ -337,13 +337,16 @@ def base_flags(fmt, playlist, out_dir):
         "-P", out_dir,
         "-o", "%(playlist_index)02d - %(title)s.%(ext)s" if playlist
               else "%(title)s.%(ext)s",
-        "--windows-filenames",    # safe names on every OS
         "--embed-metadata",
         "--embed-thumbnail",
         "--retries", "10",
         "--fragment-retries", "10",
         "--retry-sleep", "fragment:linear=2:5:15",
     ]
+    # Windows only: elsewhere this replaces every non-ASCII character and every
+    # space with "_", so real titles come out as My_Song / a row of underscores.
+    if os.name == "nt":
+        flags += ["--windows-filenames"]
     # make yt-dlp use node/bun too - it only enables deno on its own
     flags += js_runtime_flags()
     if playlist:

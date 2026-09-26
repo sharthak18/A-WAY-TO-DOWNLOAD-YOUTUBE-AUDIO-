@@ -124,9 +124,8 @@ class GrabViewModel : ViewModel() {
             toast(context, "File not found")
             return
         }
-        val target = if (file.isDirectory) file else file
         val uri: Uri = try {
-            FileProvider.getUriForFile(context, "app.grabbox.provider", target)
+            FileProvider.getUriForFile(context, "app.grabbox.provider", file)
         } catch (e: Exception) {
             toast(context, "Cannot share this path")
             return
@@ -140,20 +139,6 @@ class GrabViewModel : ViewModel() {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             toast(context, "No app can open this file")
-        }
-    }
-
-    fun openDownloadsFolder(context: Context) {
-        val uri = FileProvider.getUriForFile(
-            context, "app.grabbox.provider", File(downloadDir)
-        )
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "resource/folder")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        try {
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            toast(context, "Files are in $downloadDir")
         }
     }
 

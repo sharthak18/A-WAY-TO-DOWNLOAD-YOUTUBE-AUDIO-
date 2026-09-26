@@ -132,13 +132,37 @@ pip install pyinstaller yt-dlp
 pyinstaller packaging/grabbox.spec --noconfirm     # -> dist/GrabBox/
 ```
 
+### Changing the logo
+
+Every icon — Android launcher, notification shade, desktop app, browser
+extension, web favicon, the logo inside the web app's own header — is generated
+from one description of the mark in `tools/brand.py`: an isometric box with a
+download arrow cut into the front corner, plus three speed sparks off the
+top-right edge. Edit the geometry or palette there, then:
+
+```bash
+python3 tools/make_android_icons.py   # mipmaps, adaptive + vector layers
+python3 tools/make_app_icon.py        # desktop PNGs, icon.ico, icon.icns
+python3 tools/make_icons.py           # extension toolbar icons, both states
+python3 tools/make_web_icons.py       # web favicon + the logo in the app header
+```
+
+Pure Python, no Pillow — the same constraint the rest of `tools/` works under.
+Run all three or the surfaces drift apart. The generated files carry a
+"do not edit by hand" header; change `brand.py` instead.
+
+One detail worth knowing: `drawable/ic_stat_grabbox.xml` is the notification
+icon, and it is deliberately separate from the launcher icon. The status bar
+draws `setSmallIcon` as a flat silhouette, so pointing `DownloadService` at
+`ic_launcher_fg` is what produces the white blob in the shade.
+
 ---
 
 ## 4. Android
 
 **The native app (recommended)** — a real Kotlin app with the yt-dlp engine
 bundled inside, so there is no server, no Termux, no terminal anywhere.
-Android 6.0 or newer.
+Android 7.0 or newer (the bundled engine needs API 24).
 
 1. Grab the APK for your phone from the
    [Releases page](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest):

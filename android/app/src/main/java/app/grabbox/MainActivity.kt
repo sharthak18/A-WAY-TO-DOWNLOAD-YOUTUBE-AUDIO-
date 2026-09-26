@@ -12,6 +12,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import app.grabbox.ui.GrabBoxTheme
@@ -36,11 +38,12 @@ class MainActivity : ComponentActivity() {
         viewModel = ViewModelProvider(this)[GrabViewModel::class.java]
 
         setContent {
+            val engine by (application as GrabBoxApp).engineState.collectAsState()
             GrabBoxTheme {
                 HomeScreen(
                     viewModel = viewModel,
-                    engineOk = (application as GrabBoxApp).engineReady,
-                    engineError = (application as GrabBoxApp).engineError,
+                    engineState = engine,
+                    onRetryEngine = { (application as GrabBoxApp).startEngine() },
                 )
             }
         }
