@@ -1,0 +1,234 @@
+name: release
+
+# Publishes a GitHub Release with every installer attached under a stable,
+# human-readable name, so the download buttons in README.md always work:
+#
+#   https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows-Setup.exe
+#
+# Two ways to cut a release:
+#   * Actions → release → "Run workflow" → type a version like 0.2.0
+#   * or push a tag:  git tag v0.2.0 && git push origin v0.2.0
+#
+# The version is stamped into the desktop app and the Android app at build
+# time, so the files inside the release match the tag.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.2.0 (creates tag v0.2.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  meta:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            v="${GITHUB_REF_NAME#v}"
+          else
+            v="${{ inputs.version }}"; v="${v#v}"
+          fi
+          if ! [[ "$v" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version must look like 1.2.3 (got '$v')"; exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Releasing GrabBox $v"
+
+  desktop:
+    name: Desktop (${{ matrix.label }})
+    needs: meta
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            triple: x86_64-pc-windows-msvc
+            label: Windows
+          - os: macos-latest
+            triple: aarch64-apple-darwin
+            label: macOS Apple Silicon
+          - os: macos-15-intel
+            triple: x86_64-apple-darwin
+            label: macOS Intel
+          - os: ubuntu-latest
+            triple: x86_64-unknown-linux-gnu
+            label: Linux
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      # Restore before the version stamp below edits Cargo.toml, so the cache
+      # key matches what the regular desktop workflow saves.
+      - name: Restore Rust cache
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            desktop/src-tauri/target/
+          key: tauri-${{ matrix.triple }}-${{ hashFiles('desktop/src-tauri/Cargo.toml') }}
+
+      - name: Stamp version ${{ env.VERSION }}
+        shell: bash
+        # Windows runners expose "python", the others "python3".
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} tools/stamp_version.py "$VERSION"
+
+      - name: Stage browser extension as a bundle resource
+        shell: bash
+        run: |
+          mkdir -p desktop/src-tauri/extension
+          cp -r extension/* desktop/src-tauri/extension/
+
+      - name: Fetch sidecar binaries (yt-dlp, ffmpeg, deno)
+        shell: bash
+        run: bash desktop/fetch-sidecars.sh --target ${{ matrix.triple }}
+
+      - name: Linux system deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: Build the app + installers
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop/src-tauri
+          releaseId: ""
+
+      - name: Give the files human names
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=desktop/src-tauri/target/release/bundle
+          mkdir -p out
+          case "${{ matrix.triple }}" in
+            x86_64-pc-windows-msvc)
+              cp "$B"/nsis/*.exe out/GrabBox-Windows-Setup.exe
+              cp "$B"/msi/*.msi  out/GrabBox-Windows.msi ;;
+            aarch64-apple-darwin)
+              cp "$B"/dmg/*.dmg  out/GrabBox-macOS-AppleSilicon.dmg ;;
+            x86_64-apple-darwin)
+              cp "$B"/dmg/*.dmg  out/GrabBox-macOS-Intel.dmg ;;
+            x86_64-unknown-linux-gnu)
+              cp "$B"/appimage/*.AppImage out/GrabBox-Linux.AppImage
+              cp "$B"/deb/*.deb           out/GrabBox-Linux.deb
+              # Record which engine got bundled, for the release notes.
+              ./desktop/src-tauri/binaries/yt-dlp-x86_64-unknown-linux-gnu --version \
+                > out/engine-version.txt || echo unknown > out/engine-version.txt ;;
+          esac
+          ls -la out
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.triple }}
+          path: out/*
+          if-no-files-found: error
+
+  android:
+    name: Android
+    needs: meta
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Stamp version ${{ env.VERSION }}
+        run: python3 tools/stamp_version.py "$VERSION"
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: "8.7"
+
+      # Debug-signed on purpose: it installs with zero friction. Switch to
+      # assembleRelease once a signing keystore is wired up as a secret.
+      - name: Build APKs (per-ABI)
+        working-directory: android
+        run: gradle assembleDebug --no-daemon
+
+      - name: Give the files human names
+        run: |
+          set -euo pipefail
+          A=android/app/build/outputs/apk/debug
+          mkdir -p out
+          cp "$A"/app-arm64-v8a-debug.apk   out/GrabBox-Android.apk
+          cp "$A"/app-armeabi-v7a-debug.apk out/GrabBox-Android-32bit.apk
+          cp "$A"/app-x86_64-debug.apk      out/GrabBox-Android-x86_64.apk
+          ls -la out
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-android
+          path: out/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub Release
+    needs: [meta, desktop, android]
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.meta.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: release
+
+      - name: Checksums + release notes
+        run: |
+          set -euo pipefail
+          engine="$(cat release/engine-version.txt 2>/dev/null || echo unknown)"
+          rm -f release/engine-version.txt
+          (cd release && sha256sum * > SHA256SUMS.txt)
+          ls -la release
+          python3 tools/release_notes.py "$VERSION" "$engine" > notes.md
+          cat notes.md
+
+      - name: Create or update the release
+        run: |
+          set -euo pipefail
+          tag="v$VERSION"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $tag exists - replacing assets and notes"
+            gh release upload "$tag" release/* --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" \
+              --title "GrabBox $VERSION" --notes-file notes.md \
+              --draft=false --prerelease=false --latest
+          else
+            gh release create "$tag" release/* --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "GrabBox $VERSION" \
+              --notes-file notes.md --latest
+          fi
+          echo "https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag" >> "$GITHUB_STEP_SUMMARY"

@@ -1,15 +1,15 @@
 name: desktop (Tauri)
 
-# Builds the GrabBox desktop app (Tauri v2) for Windows, macOS (Intel + Apple
-# Silicon) and Linux, with the yt-dlp / ffmpeg / deno sidecars bundled.
-# On a `v*` tag it also drafts a GitHub Release with the installers attached.
+# Continuous build of the GrabBox desktop app (Tauri v2) for Windows, macOS
+# (Intel + Apple Silicon) and Linux, with the yt-dlp / ffmpeg / deno sidecars
+# bundled. This is the "does it still compile?" check on every push; the
+# installers people actually download come from release.yml, which publishes
+# them to GitHub Releases under stable names.
 
 on:
   push:
     branches: [main, "arena/*"]
   workflow_dispatch: {}
-  release:
-    types: [published]
 
 concurrency:
   group: desktop-${{ github.ref }}
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: GrabBox (${{ matrix.triple }})
+    name: GrabBox (${{ matrix.label }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -25,12 +25,16 @@ jobs:
         include:
           - os: windows-latest
             triple: x86_64-pc-windows-msvc
+            label: Windows
           - os: macos-latest
             triple: aarch64-apple-darwin
+            label: macOS-AppleSilicon
           - os: macos-15-intel
             triple: x86_64-apple-darwin
+            label: macOS-Intel
           - os: ubuntu-latest
             triple: x86_64-unknown-linux-gnu
+            label: Linux
 
     steps:
       - uses: actions/checkout@v6
@@ -69,7 +73,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: desktop/src-tauri
-          # Only tag pushes produce a release; branch pushes just build.
           releaseId: ""
         id: tauri
 
@@ -85,20 +88,15 @@ jobs:
             desktop/src-tauri/target/
           key: tauri-${{ matrix.triple }}-${{ hashFiles('desktop/src-tauri/Cargo.toml') }}
 
+      # Installers only. The raw .app folder is what the .dmg already contains;
+      # uploading both doubled the macOS artifact to ~300 MB.
       - uses: actions/upload-artifact@v7
         with:
-          name: GrabBox-desktop-${{ matrix.triple }}
+          name: GrabBox-desktop-${{ matrix.label }}
           path: |
             desktop/src-tauri/target/release/bundle/nsis/*.exe
             desktop/src-tauri/target/release/bundle/msi/*.msi
             desktop/src-tauri/target/release/bundle/dmg/*.dmg
-            desktop/src-tauri/target/release/bundle/macos/*.app*
             desktop/src-tauri/target/release/bundle/deb/*.deb
             desktop/src-tauri/target/release/bundle/appimage/*.AppImage
           if-no-files-found: error
-
-# NOTE: this file is a TEMPLATE (same reason as the PyInstaller one — GitHub
-# blocks bots from adding workflow files). To enable CI builds, copy it to
-#   .github/workflows/desktop.yml
-# in your own clone, then push. Installers appear under Actions artifacts on
-# every push, and under Releases when you tag a version.

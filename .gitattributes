@@ -1,0 +1,14 @@
+# Normalise line endings regardless of contributor OS.
+* text=auto eol=lf
+
+# cmd.exe wants CRLF; POSIX shells want LF - do not let autocrlf flip them.
+*.bat      text eol=crlf
+*.sh       text eol=lf
+*.command  text eol=lf
+
+# Binaries
+*.png binary
+*.ico binary
+*.icns binary
+*.jar binary
+*.keystore binary

@@ -17,7 +17,7 @@ where downloads happen and one place to fix.
     GET  /api/clipboard        newest URL seen on the clipboard
     GET|POST /api/config       settings
 
-Run it:  python3 -m grabbox   (or launch.py / run.bat / run.sh)
+Run it:  python3 -m grabbox   (or a double-click launcher from scripts/)
 """
 
 import json

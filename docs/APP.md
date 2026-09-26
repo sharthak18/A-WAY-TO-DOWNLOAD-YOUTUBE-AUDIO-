@@ -22,15 +22,19 @@ Everything runs **on your device**. Nothing is uploaded anywhere.
 
 ## 1a. Desktop app (recommended on computers)
 
-Grab the installer for your OS from **Actions → desktop (Tauri) → Artifacts**
-(`GrabBox-desktop-windows`, `GrabBox-desktop-macos`, `GrabBox-desktop-linux`),
-or from Releases once a release is cut:
+Download from the **[Releases page](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest)**
+— the front-page [README](../README.md#download) has one-click buttons. File names
+are stable, so `…/releases/latest/download/<name>` always fetches the newest build:
 
-| OS | Install |
-|---|---|
-| Windows | run the `.msi` (or `.exe`) |
-| macOS | open the `.dmg`, drag GrabBox to Applications |
-| Linux | `.AppImage` (no install) or `.deb` |
+| OS | File | Install |
+|---|---|---|
+| Windows | `GrabBox-Windows-Setup.exe` (or `GrabBox-Windows.msi`) | run it |
+| macOS (Apple Silicon) | `GrabBox-macOS-AppleSilicon.dmg` | open, drag GrabBox to Applications |
+| macOS (Intel) | `GrabBox-macOS-Intel.dmg` | same |
+| Linux | `GrabBox-Linux.AppImage` (no install) or `GrabBox-Linux.deb` | `chmod +x` the AppImage, or `sudo apt install ./GrabBox-Linux.deb` |
+
+(Unreleased builds of every push are also under **Actions → desktop (Tauri) →
+Artifacts**, but those need a GitHub login and expire after 90 days.)
 
 yt-dlp, ffmpeg and a JS runtime are bundled **inside** the app — install and
 open, nothing else to get. It sits in the system tray, single instance:
@@ -44,11 +48,6 @@ footer open a feedback email to **feedit18@gmail.com**.
 ---
 
 ## 1b. The core (server + web UI)
-
-This repo already ships a working `vendor/` folder (yt-dlp 2026.08.19, the
-`bgutil` PO-token plugin, and a static ffmpeg) so it runs with **no system
-install** — it is what the live preview uses. On your own machine you can
-instead install normally:
 
 You need **Python 3**, **yt-dlp**, and (for merging/converting) **ffmpeg**.
 
@@ -71,10 +70,10 @@ A window opens at `http://127.0.0.1:8765`.
 
 | Platform | Launcher |
 |---|---|
-| Windows | double-click `GrabBox.bat` |
-| Linux | `./GrabBox.sh` |
-| macOS | double-click `GrabBox.command` |
-| Anywhere | `python3 -m grabbox` or `python3 launch.py` |
+| Windows | double-click `scripts\grabbox.bat` |
+| Linux | `./scripts/grabbox.sh` |
+| macOS | double-click `scripts/grabbox.command` |
+| Anywhere | `python3 -m grabbox` from the repo root |
 
 Useful flags: `--dir FOLDER`, `--port 8765`, `--host 0.0.0.0` (reach it from
 other devices on your LAN), `--watch-clipboard` (auto-pick-up copied links).
@@ -112,15 +111,21 @@ download itself.
 
 ---
 
-## 3. The desktop installers are CI-built; one-file binaries too
+## 3. How the installers get built
 
-The Tauri installers from section 1a build on every push (see **Actions →
-desktop (Tauri) → Artifacts**): `.msi` + `.exe` on Windows, `.dmg` on macOS,
-`.AppImage` + `.deb` on Linux.
+Three workflows in `.github/workflows/`:
 
-A separate action also builds a single-folder PyInstaller binary per OS
-(`GrabBox-windows`, `GrabBox-ubuntu`, `GrabBox-macos` under **Actions →
-build**), handy for USB sticks. To build that one locally:
+* **release** — the one that matters to users. **Actions → release → Run
+  workflow** → type a version (`0.2.1`), or push a tag `v0.2.1`. It stamps the
+  version into the desktop and Android apps (`tools/stamp_version.py`), builds
+  every installer, and publishes a GitHub Release with the stable file names
+  from section 1a plus `SHA256SUMS.txt`.
+* **desktop (Tauri)** — compiles the desktop app on every push as a smoke test
+  (artifacts under Actions, login required, 90-day expiry).
+* **build** — same idea for the Android APKs and a single-folder PyInstaller
+  build per OS (`GrabBox-windows-latest`, `GrabBox-ubuntu-latest`,
+  `GrabBox-macos-latest`), handy for USB sticks. To build that one locally
+  (from the repo root):
 
 ```bash
 pip install pyinstaller yt-dlp
@@ -135,10 +140,11 @@ pyinstaller packaging/grabbox.spec --noconfirm     # -> dist/GrabBox/
 bundled inside, so there is no server, no Termux, no terminal anywhere.
 Android 6.0 or newer.
 
-1. Grab the APK for your phone from the CI artifacts / Releases:
-   `app-arm64-v8a-debug.apk` (almost every phone from the last ~8 years),
-   `app-armeabi-v7a-debug.apk` (very old 32-bit phones), or
-   `app-x86_64-debug.apk` (emulators).
+1. Grab the APK for your phone from the
+   [Releases page](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest):
+   `GrabBox-Android.apk` (almost every phone from the last ~8 years),
+   `GrabBox-Android-32bit.apk` (very old 32-bit phones), or
+   `GrabBox-Android-x86_64.apk` (emulators).
 2. Install it. Android will warn about "unknown apps from this source" the
    first time — allow it for your browser/file manager. That's the only hoop;
    sideloading is normal for apps distributed outside the Play Store.
@@ -176,7 +182,7 @@ Prefer running the same server-based UI in Termux instead (e.g. so a tablet or
 desktop on your Wi-Fi can reach it too)?
 
 ```bash
-bash android/termux-install.sh
+bash android/termux-install.sh     # from the repo root
 ```
 
 It installs python + ffmpeg + yt-dlp + deno, starts the server, and opens the

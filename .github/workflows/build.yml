@@ -1,5 +1,9 @@
 name: build
 
+# Continuous build of the portable (PyInstaller) folder per OS and the Android
+# APKs, so a broken push is caught early. Downloadable releases with stable
+# file names are published by release.yml.
+
 on:
   push:
     branches: [main, "arena/*"]
@@ -63,6 +67,3 @@ jobs:
           name: GrabBox-Android
           path: android/app/build/outputs/apk/**/*.apk
 
-# NOTE: this file is a TEMPLATE. To enable CI builds, copy it to
-#   .github/workflows/build.yml
-# in your own clone (GitHub blocks bots from adding workflow files directly).

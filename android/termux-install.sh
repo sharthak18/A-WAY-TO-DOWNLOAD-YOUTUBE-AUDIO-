@@ -30,5 +30,5 @@ termux-setup-storage || true
 # Open the UI in the phone's browser.
 ( termux-open-url http://127.0.0.1:8765 ) || true
 
-exec python "$HERE/launch.py" --host 127.0.0.1 --no-browser \
+cd "$HERE" && exec python -m grabbox --host 127.0.0.1 --no-browser \
   --dir "$HOME/storage/shared/Download/GrabBox"
