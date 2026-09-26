@@ -49,6 +49,9 @@ whatever `yt-dlp` / `ffmpeg` / `deno` are on your PATH.
 
 ## CI
 
-`packaging/github-workflow-desktop.yml` (template — copy to
-`.github/workflows/desktop.yml`) builds all four targets on every push and
-attaches installers to Releases on tags.
+`.github/workflows/desktop.yml` compiles all four targets on every push (smoke
+test). `.github/workflows/release.yml` — run it from the Actions tab with a
+version number, or push a `v*` tag — stamps the version, builds the same four
+targets plus Android, and publishes a GitHub Release with stable file names
+(`GrabBox-Windows-Setup.exe`, `GrabBox-macOS-AppleSilicon.dmg`, …) that the
+front-page download buttons link to.

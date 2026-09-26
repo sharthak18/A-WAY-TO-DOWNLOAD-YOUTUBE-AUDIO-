@@ -1,263 +1,126 @@
-# A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-
+<h1 align="center">GrabBox</h1>
 
-That is the spirit. You are now entering "Legend" territory. Using yt-dlp is the gold standard because it gives you control that no website ever will.
+<p align="center">
+  <b>Paste a link. Pick a quality. Download.</b><br>
+  Music, videos, whole playlists — from YouTube and 1800+ other sites — saved on <i>your</i> device.<br>
+  Everything is bundled inside the app. Nothing else to install.
+</p>
 
-💬 Feedback, ideas, bug reports? Email **feedit18@gmail.com** — or use the chat
-button inside the app (top right), it pre-fills everything we need to help.
+<p align="center">
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows-Setup.exe"><img alt="Download for Windows" src="https://img.shields.io/badge/Windows-Download-0078D6?style=for-the-badge&logoColor=white&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTAgMGgxMXYxMUgwem0xMyAwaDExdjExSDEzek0wIDEzaDExdjExSDB6bTEzIDBoMTF2MTFIMTN6Ii8%2BPC9zdmc%2B"></a>
+  &nbsp;
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-AppleSilicon.dmg"><img alt="Download for macOS" src="https://img.shields.io/badge/macOS-Download-000000?style=for-the-badge&logo=apple&logoColor=white"></a>
+  &nbsp;
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Linux.AppImage"><img alt="Download for Linux" src="https://img.shields.io/badge/Linux-Download-FCC624?style=for-the-badge&logo=linux&logoColor=black"></a>
+  &nbsp;
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Android.apk"><img alt="Download for Android" src="https://img.shields.io/badge/Android-Download-3DDC84?style=for-the-badge&logo=android&logoColor=black"></a>
+</p>
 
----
-
-## Getting `HTTP Error 403: Forbidden`? Read this first
-
-If your download dies with:
-
-```
-[youtube] XXXXXXXX: Downloading android vr player API JSON
-ERROR: unable to download video data: HTTP Error 403: Forbidden
-```
-
-your link is fine — your **yt-dlp is too old**. YouTube started rejecting the
-`android_vr` player client that old builds use by default, and it was removed
-from the defaults in release `2026.08.19`. One command usually ends it:
-
-```bash
-python -m pip install -U yt-dlp     # or: yt-dlp -U  for the standalone .exe
-```
-
-Everything else that can go wrong — cookies, player clients, ffmpeg, the
-JavaScript runtime, rate limits — is written up in
-**[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
-
-## The easy way: `ytgrab.py`
-
-Instead of memorising flags, run the menu:
-
-```bash
-python3 ytgrab.py           # Linux / macOS   (Windows: double-click run.bat)
-```
-
-```
-================================
-  ytgrab  -  keep your media local
-================================
-  yt-dlp : 2026.08.19
-           27 day(s) old (fresh - update if older than 45 days)
-  ffmpeg : /usr/bin/ffmpeg
-  JS     : deno (~/.deno/bin/deno)
-
-Paste your URL: https://youtu.be/OfS1jFck8YQ
-
-Choose format:
-  1) Best video + audio (mp4, works on any phone)
-  2) Audio - opus (best quality per MB, small files)
-  3) Audio - flac (lossless container, big files)
-  4) Audio - m4a (great quality, plays everywhere)
-  5) Audio - mp3 (maximum compatibility)
-  p) Same thing, but for a whole playlist / album
-  c) Retry the last URL with browser cookies (fixes most 403s)
-  l) List available formats for a URL
-  u) Update yt-dlp
-  d) Doctor - check yt-dlp / ffmpeg / deno
-  q) Quit
-Choice [1-5]: 5
-```
-
-What it does that a plain `yt-dlp` call does not:
-
-* **Checks your setup first** — yt-dlp age, ffmpeg, JavaScript runtime — and
-  offers to update a stale yt-dlp before it costs you a failed download.
-* **Enables node/bun as JS runtimes.** yt-dlp only enables deno on its own, so
-  if you have node it still reports `JS runtimes: none` and quietly drops to a
-  single player client.
-* **Retries on its own.** If YouTube answers 403/429, it walks a ladder —
-  defaults → skip `android_vr` + add `web_safari` → TV clients → IPv4 — and
-  says what each attempt is doing.
-* **Clean files.** Title-only names (safe on Windows too), embedded metadata
-  and cover art, saved to `~/Downloads`, and a download archive so re-running a
-  playlist never fetches the same track twice.
-* **Plain-English errors.** "YouTube refused the stream URL (403). Cause is
-  almost always an outdated yt-dlp - update it first, then retry."
-
-Useful one-liners:
-
-```bash
-python3 ytgrab.py --doctor                       # is my setup healthy?
-python3 ytgrab.py --update                       # update yt-dlp
-python3 ytgrab.py "URL" --format 5               # mp3, no menu
-python3 ytgrab.py "PLAYLIST" --format 4 --playlist   # whole album as m4a
-python3 ytgrab.py --list "URL"                   # what formats exist?
-python3 ytgrab.py "URL" --format 5 --cookies chrome  # the 403 last resort
-```
-
-Files: `ytgrab.py` (the tool), `run.bat` (Windows double-click),
-`run.sh` (Linux/macOS), `TROUBLESHOOTING.md` (every error, explained).
-
-> Keep it personal: your own uploads, Creative-Commons material, offline
-> copies you are allowed to keep. Downloading other people's copyright material
-> breaks YouTube's terms and, depending on where you live, the law.
+<p align="center">
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest"><img alt="Latest version" src="https://img.shields.io/github/v/release/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-?label=latest&style=flat-square"></a>
+  <img alt="Downloads" src="https://img.shields.io/github/downloads/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/total?style=flat-square">
+  <a href="https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases"><img alt="All releases" src="https://img.shields.io/badge/all%20downloads-Releases%20page-555?style=flat-square"></a>
+</p>
 
 ---
 
-## Want real software? GrabBox (desktop app + extension + Android)
+## Download
 
-If menus feel like work, there is a proper app in this repo:
+Every file lives on the **[Releases page](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest)**.
+The links below always point at the newest version.
+
+| Your device | Download | Good to know |
+|---|---|---|
+| **Windows** 10 / 11 | [GrabBox-Windows-Setup.exe](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows-Setup.exe) | Prefer an MSI? [GrabBox-Windows.msi](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows.msi) |
+| **Mac** — Apple Silicon (M1 · M2 · M3 · M4) | [GrabBox-macOS-AppleSilicon.dmg](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-AppleSilicon.dmg) | Any Mac sold since late 2020 |
+| **Mac** — Intel | [GrabBox-macOS-Intel.dmg](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-Intel.dmg) | Not sure? Apple menu → *About This Mac* → *Chip* |
+| **Linux** | [GrabBox-Linux.AppImage](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Linux.AppImage) | No install needed. Ubuntu / Debian / Mint can use the [.deb](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Linux.deb) instead |
+| **Android** 7.0 or newer | [GrabBox-Android.apk](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Android.apk) | Very old 32-bit phone? [GrabBox-Android-32bit.apk](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Android-32bit.apk) |
+
+**yt-dlp, ffmpeg and a JavaScript runtime are packed inside** the app. Install it, open it, done.
+If YouTube changes something months from now, *Settings → Update yt-dlp* fixes it without reinstalling.
+
+### First launch — the one warning you will see
+
+The app is free and open source but not (yet) code-signed, so your OS asks once:
+
+* **Windows** — SmartScreen says "Windows protected your PC": click **More info → Run anyway**.
+* **macOS** — "cannot be opened because Apple cannot check it": **right-click the app → Open → Open**
+  (or *System Settings → Privacy & Security → Open Anyway*).
+* **Android** — tap **Settings** on the "Install unknown apps" prompt, allow it for your browser, go back, tap **Install**.
+* **Linux** — AppImage: make it executable first (`chmod +x GrabBox-Linux.AppImage`, or right-click → *Properties → Allow executing*).
+
+## How to use it
+
+1. **Open GrabBox** and **paste a link** — a video, a song, a playlist, an album.
+   On Android you can also use **Share → GrabBox** from YouTube or your browser.
+2. GrabBox reads the link and shows what it is. **Pick what you want**: video (MP4), or audio as
+   MP3 / M4A / Opus / FLAC, and the quality. Rename it if you like.
+3. Hit **Download**. Progress shows in the queue; files land in **Downloads → GrabBox**
+   (changeable in Settings) with the title as the file name, cover art and artist info embedded.
+
+Playlists work the same way — paste the playlist link and every track is numbered in order.
+
+## Also in the box
+
+<details>
+<summary><b>Browser extension</b> — download from the page you are on</summary>
+
+A toolbar icon that lights up when a page has something worth grabbing, a right-click
+"Grab with GrabBox", and a hover button on videos / images / file links. It hands the
+link to the desktop app, so install that first.
+
+In the desktop app open *Settings → Add the browser extension*; it shows the folder to
+load. Or manually: `chrome://extensions` → *Developer mode* → *Load unpacked* → the
+`extension/` folder of this repo. Firefox: `about:debugging#/runtime/this-firefox` →
+*Load Temporary Add-on*. Details in [APP.md](APP.md#2-browser-extension-chrome--edge--brave--firefox).
+</details>
+
+<details>
+<summary><b>Run it from source</b> — Python, no installer</summary>
 
 ```bash
-python3 -m grabbox      # opens the app: paste a link, pick quality, done
+python3 -m pip install -U yt-dlp        # plus ffmpeg from your package manager
+python3 -m grabbox                      # opens the same UI in your browser
 ```
 
-* **Desktop app (new, Tauri)** (`desktop/`) — native window, real installers
-  (.msi / .dmg / .AppImage / .deb) with yt-dlp + ffmpeg + deno bundled. Nothing
-  to install first. See **[RESEARCH.md](RESEARCH.md)** for the design research
-  behind it.
-* **One UI for everything** — video, audio, images, installers, archives,
-  playlists, and all 1800+ yt-dlp sites. The same UI runs in the desktop
-  window, in your browser via `python3 -m grabbox`, and over your Wi-Fi.
-* **Browser extension** (`extension/`) — a *faded* icon that lights up when a
-  page has something worth grabbing, right-click "Grab with GrabBox", and a
-  hover mini-button on any downloadable thing.
-* **Android app (native)** (`android/`) — Kotlin + Jetpack Compose with the
-  yt-dlp engine bundled in; share any link to it like you would to Seal,
-  works on Android 6+, asks for permissions only when it actually needs them.
-  Termux one-script install is still there for the nerds.
-* **Windows / macOS / Linux** launchers, and one-file binaries via CI.
+`python3 -m grabbox --host 0.0.0.0` makes it reachable from every phone and tablet on
+your Wi-Fi. Windows / macOS / Linux double-click launchers (`GrabBox.bat`,
+`GrabBox.command`, `GrabBox.sh`) are in the repo root. Full guide: [APP.md](APP.md).
+</details>
 
-Full install + run guide for every platform: **[APP.md](APP.md)**.
+<details>
+<summary><b>Terminal tools</b> — <code>ytgrab.py</code> menu and raw <code>yt-dlp</code> commands</summary>
 
-## The manual way (how it all works underneath)
+`python3 ytgrab.py` is a terminal menu that checks your setup, retries automatically when
+YouTube says 403, and names files cleanly. The original step-by-step `yt-dlp` guide that
+this repo started as — folder, `cmd`, the "magic command", playlists, metadata — is
+preserved in **[MANUAL.md](MANUAL.md)**, and the copy-paste cheat sheet in
+[Short Cut](Short%20Cut).
+</details>
 
-Since you are a beginner to this tool, I will give you the "Easiest Possible Method" to get it running on Windows without needing to be a coder.
+<details>
+<summary><b>For developers</b> — building it yourself</summary>
 
-Step 1: Download the Files
-You need two things: the engine (yt-dlp) and the converter (ffmpeg).
+* Desktop app: [desktop/README.md](desktop/README.md) (Tauri v2, Rust).
+* Android app: `android/` (Kotlin + Jetpack Compose, `gradle assembleDebug`).
+* Why it is built the way it is: [RESEARCH.md](RESEARCH.md).
+* Cutting a release: **Actions → release → Run workflow** → type a version such as `0.2.1`.
+  CI builds every installer, stamps the version into them, and publishes a GitHub Release
+  with the file names used on this page. Pushing a tag `v0.2.1` does the same.
+</details>
 
-Create a Folder:
+## Something not working?
 
-Go to your Desktop or C: drive and create a new folder named youtube-dl.
+* **`HTTP Error 403: Forbidden`** on YouTube almost always means the engine is outdated:
+  *Settings → Update yt-dlp*, then retry. GrabBox also retries other player clients on its own.
+* Every other error, explained in plain English: **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
+* Still stuck, or have an idea? Email **feedit18@gmail.com**, or use the 💬 button inside the
+  app — it pre-fills everything needed to help.
 
-Download yt-dlp:
+## Privacy & legality
 
-Go to the official yt-dlp GitHub Releases page.
-
-Look under "Assets" and click on yt-dlp.exe to download it.
-
-Move this file into your youtube-dl folder.
-
-Download FFmpeg (Crucial):
-
-yt-dlp needs this to convert the video into a high-quality song file.
-
-Go to gyan.dev/ffmpeg/builds (this is the safe, standard place).
-
-Download the file named ffmpeg-git-essentials.7z (or .zip).
-
-Open that zip file. Go inside the bin folder.
-
-You will see ffmpeg.exe. Drag and drop ffmpeg.exe into your youtube-dl folder (right next to yt-dlp.exe).
-
-Checkpoint: Your folder youtube-dl should now have at least two files: yt-dlp.exe and ffmpeg.exe.
-
-Step 2: Open the "Command Center"
-We don't double-click yt-dlp.exe. We talk to it using a text window.
-
-Open your youtube-dl folder where the files are.
-
-Click inside the address bar at the top of the folder window (where it says "This PC > Desktop > youtube-dl").
-
-Erase everything there, type cmd, and hit Enter.
-
-A black window will pop up. This is your command center, and it is already looking at your folder.
-
-Step 3: The Magic Command (Copy & Paste)
-To download your favorite video as the highest quality song possible, type this command into the black window:
-
-yt-dlp -x --audio-format m4a "PASTE_YOUR_LINK_HERE"
-
-Breakdown of the command:
-
-yt-dlp: Calls the program.
-
--x: Tells it "Extract audio only" (delete the video part).
-
---audio-format m4a: Tells it to keep the audio in M4A.
-
-Legend Tip: YouTube streams in M4A/AAC. Downloading in M4A means you get the exact original quality. Converting to MP3 technically lowers quality slightly, but if you absolutely need MP3, just change m4a to mp3 in the command.
-
-"LINK": Paste your YouTube link inside quotes.
-
-Example: yt-dlp -x --audio-format m4a "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-
-Hit Enter. You will see lines of text flying by. When it stops, the song file will appear in your folder.
-
-Troubleshooting
-"Command not found": You probably didn't open the cmd window inside the folder. Try Step 2 again.
-
-
-Here is the upgraded command that will:
-
-Remove the ID from the filename.
-
-Add the Cover Art (Thumbnail) to the file so it shows up on your phone.
-
-Add Metadata (Artist/Song info) so your car/phone display reads it correctly.
-
-Copy and paste this command:
-
-DOS :
-yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%(title)s.%(ext)s" https://youtu.be/WECKJ1VzCVA
-
-
-What's different in this command?
--o "%(title)s.%(ext)s": This tells the tool: "Name the file just the video title. Don't add the weird ID code at the end."
-
---embed-thumbnail: This grabs the picture from the YouTube video and "glues" it onto your song file as the album art.
-
---add-metadata: This writes the song details inside the file, so when you play it on your phone, it doesn't just say "Unknown Artist."
-
-Pro Tip for "Official" Music Videos
-Sometimes YouTube titles are messy, like "Linkin Park - Numb (Official Video)". You don't want (Official Video) showing up on your phone.
-
-You can actually rename the file before you download it by typing the name you want inside the quotes.
-
-Example: If you want the file to be named exactly "My Jam.m4a", you type:
-
-DOS:
-
-yt-dlp -x --audio-format m4a -o "My Jam.%(ext)s" https://youtu.be/WECKJ1VzCVA
-
-(Just replace "My Jam" with whatever name you want).
-
-"FFmpeg not found": Make sure ffmpeg.exe is sitting right next to yt-dlp.exe in the same folder.
-
-
-1. The Playlist Command
-You use the same command, but you paste a Playlist Link instead of a video link.
-
-However, for playlists, we usually want the files to stay in the correct order (1, 2, 3...). So we tweak the naming part slightly:
-
-DOS
-yt-dlp -x --audio-format m4a --add-metadata --embed-thumbnail -o "%(playlist_index)s - %(title)s.%(ext)s" "PASTE_PLAYLIST_LINK_HERE"
-What changed?
-
-%(playlist_index)s: This puts "01", "02", "03" at the start of the filename.
-
-Now your music player will play the album in the exact order you set it on YouTube, rather than shuffling it alphabetically.
-
-2. Important Maintenance (The "Update" Command)
-YouTube changes their code constantly to break downloaders. If one day you type a command and get a weird "Error" or "Crash," it means your tool is outdated.
-
-You don't need to re-download anything. Just type this command to update it instantly:
-
-DOS
-yt-dlp -U
-(Note: Capital U). It will say "Updated to version [date]" and you are good to go again.
-
-If yt-dlp was installed with pip, `-U` cannot update it and you will see the
-warning *"You installed yt-dlp with pip... Use that to update."* Then run:
-
-DOS
-python -m pip install -U yt-dlp
-
-Check the result with `yt-dlp --version`. It prints a date, like `2026.08.19`;
-anything older than about 45 days is worth updating before you blame your link.
-`python3 ytgrab.py --update` tries both methods for you.
+100 % local. The only network traffic is between your device and the site you download
+from. Use it for your own uploads, Creative-Commons material, things you bought, or
+offline copies you are allowed to keep — downloading other people's copyrighted material
+breaks YouTube's terms and, depending on where you live, the law.
