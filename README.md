@@ -33,7 +33,7 @@ The links below always point at the newest version.
 |---|---|---|
 | **Windows** 10 / 11 | [GrabBox-Windows-Setup.exe](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows-Setup.exe) | Prefer an MSI? [GrabBox-Windows.msi](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Windows.msi) |
 | **Mac** — Apple Silicon (M1 · M2 · M3 · M4) | [GrabBox-macOS-AppleSilicon.dmg](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-AppleSilicon.dmg) | Any Mac sold since late 2020 |
-| **Mac** — Intel | [GrabBox-macOS-Intel.dmg](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-Intel.dmg) | Not sure? Apple menu → *About This Mac* → *Chip* |
+| **Mac** — Intel | [GrabBox-macOS-Intel.dmg](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-macOS-Intel.dmg) | Not sure? Go Apple menu → *About This Mac* → *Chip* |
 | **Linux** | [GrabBox-Linux.AppImage](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Linux.AppImage) | No install needed. Ubuntu / Debian / Mint can use the [.deb](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Linux.deb) instead |
 | **Android** 7.0 or newer | [GrabBox-Android.apk](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Android.apk) | Very old 32-bit phone? [GrabBox-Android-32bit.apk](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest/download/GrabBox-Android-32bit.apk) |
 
