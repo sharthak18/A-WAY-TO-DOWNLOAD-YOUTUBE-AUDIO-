@@ -24,12 +24,12 @@ order, and keeps going when the first try is blocked.
 
 Usage
 -----
-    python3 ytgrab.py                 # interactive menu (easiest)
-    python3 ytgrab.py URL             # menu for one URL
-    python3 ytgrab.py URL --format 5  # straight to mp3, no menu
-    python3 ytgrab.py --doctor        # check yt-dlp / ffmpeg / deno
-    python3 ytgrab.py --update        # update yt-dlp
-    python3 ytgrab.py --list URL      # show available formats
+    python3 scripts/ytgrab.py                 # interactive menu (easiest)
+    python3 scripts/ytgrab.py URL             # menu for one URL
+    python3 scripts/ytgrab.py URL --format 5  # straight to mp3, no menu
+    python3 scripts/ytgrab.py --doctor        # check yt-dlp / ffmpeg / deno
+    python3 scripts/ytgrab.py --update        # update yt-dlp
+    python3 scripts/ytgrab.py --list URL      # show available formats
 
 Works on Windows, macOS and Linux. Standard library only.
 """
@@ -234,7 +234,7 @@ def check_environment(ytdlp, quiet=False):
         report["problems"].append("ytdlp-stale")
         say("  [!] Your yt-dlp is %d days old. This is the usual cause of"
             % report["ytdlp_age"])
-        say('      "HTTP Error 403: Forbidden". Run:  python3 ytgrab.py --update')
+        say('      "HTTP Error 403: Forbidden". Run:  python3 scripts/ytgrab.py --update')
 
     if not ffmpeg:
         report["problems"].append("ffmpeg-missing")
@@ -402,7 +402,7 @@ def diagnose(text):
         return ("That format is not offered for this video. Try m4a (4) or "
                 "let yt-dlp pick by choosing 1.")
     if re.search(r"ffmpeg.*(not found|not installed)|Unable to locate ffmpeg", t, re.I):
-        return "ffmpeg is missing or not on PATH - see 'python3 ytgrab.py --doctor'."
+        return "ffmpeg is missing or not on PATH - see 'python3 scripts/ytgrab.py --doctor'."
     if re.search(r"No supported JavaScript runtime", t, re.I):
         return ("No JS runtime: install deno (see --doctor). YouTube still works "
                 "without it but has fewer usable formats.")
@@ -579,7 +579,7 @@ def interactive(ytdlp, args):
             if rc == 0:
                 say("  Files in: %s" % out_dir)
             else:
-                say("  That did not work either - see TROUBLESHOOTING.md.")
+                say("  That did not work either - see docs/TROUBLESHOOTING.md.")
             last_url = None
             continue
         if choice == "p":
@@ -643,7 +643,7 @@ def main(argv=None):
             say("")
             say("Still blocked? The next thing that usually works is your "
                 "browser's cookies:")
-            say('  python3 ytgrab.py "%s" --format %s --cookies chrome'
+            say('  python3 scripts/ytgrab.py "%s" --format %s --cookies chrome'
                 % (args.url, args.fmt))
         return 0 if ok else 1
 

@@ -1,7 +1,7 @@
 # The terminal way: `ytgrab.py` and raw `yt-dlp`
 
 You do not need any of this to use GrabBox — the app on the
-[front page](README.md) bundles everything. This file is for people who like a
+[front page](../README.md) bundles everything. This file is for people who like a
 terminal, or who want to understand what happens underneath. Both tools here
 need **Python 3**, **yt-dlp** and **ffmpeg** installed on your computer.
 
@@ -12,7 +12,7 @@ need **Python 3**, **yt-dlp** and **ffmpeg** installed on your computer.
 Instead of memorising flags, run the menu:
 
 ```bash
-python3 ytgrab.py           # Linux / macOS   (Windows: double-click run.bat)
+python3 scripts/ytgrab.py   # Linux / macOS   (Windows: double-click scripts\ytgrab.bat)
 ```
 
 ```
@@ -60,16 +60,16 @@ What it does that a plain `yt-dlp` call does not:
 Useful one-liners:
 
 ```bash
-python3 ytgrab.py --doctor                       # is my setup healthy?
-python3 ytgrab.py --update                       # update yt-dlp
-python3 ytgrab.py "URL" --format 5               # mp3, no menu
-python3 ytgrab.py "PLAYLIST" --format 4 --playlist   # whole album as m4a
-python3 ytgrab.py --list "URL"                   # what formats exist?
-python3 ytgrab.py "URL" --format 5 --cookies chrome  # the 403 last resort
+python3 scripts/ytgrab.py --doctor                       # is my setup healthy?
+python3 scripts/ytgrab.py --update                       # update yt-dlp
+python3 scripts/ytgrab.py "URL" --format 5               # mp3, no menu
+python3 scripts/ytgrab.py "PLAYLIST" --format 4 --playlist   # whole album as m4a
+python3 scripts/ytgrab.py --list "URL"                   # what formats exist?
+python3 scripts/ytgrab.py "URL" --format 5 --cookies chrome  # the 403 last resort
 ```
 
-Files: `ytgrab.py` (the tool), `run.bat` (Windows double-click),
-`run.sh` (Linux/macOS), `TROUBLESHOOTING.md` (every error, explained).
+Files: `scripts/ytgrab.py` (the tool), `scripts/ytgrab.bat` (Windows double-click),
+`scripts/ytgrab.sh` (Linux/macOS), `TROUBLESHOOTING.md` (every error, explained).
 
 > Keep it personal: your own uploads, Creative-Commons material, offline
 > copies you are allowed to keep. Downloading other people's copyright material
@@ -215,7 +215,7 @@ python -m pip install -U yt-dlp
 
 Check the result with `yt-dlp --version`. It prints a date, like `2026.08.19`;
 anything older than about 45 days is worth updating before you blame your link.
-`python3 ytgrab.py --update` tries both methods for you.
+`python3 scripts/ytgrab.py --update` tries both methods for you.
 
 ---
 

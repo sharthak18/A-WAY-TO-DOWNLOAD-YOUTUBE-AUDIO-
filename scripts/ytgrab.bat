@@ -1,5 +1,5 @@
 @echo off
-REM  ytgrab launcher for Windows - double-click me.
+REM  ytgrab (terminal menu) for Windows - double-click me.
 REM  Needs Python 3 (https://www.python.org/downloads/, tick "Add to PATH")
 REM  and yt-dlp:  python -m pip install -U yt-dlp
 setlocal

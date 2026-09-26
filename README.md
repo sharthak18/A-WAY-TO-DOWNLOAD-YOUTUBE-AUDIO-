@@ -73,7 +73,7 @@ link to the desktop app, so install that first.
 In the desktop app open *Settings → Add the browser extension*; it shows the folder to
 load. Or manually: `chrome://extensions` → *Developer mode* → *Load unpacked* → the
 `extension/` folder of this repo. Firefox: `about:debugging#/runtime/this-firefox` →
-*Load Temporary Add-on*. Details in [APP.md](APP.md#2-browser-extension-chrome--edge--brave--firefox).
+*Load Temporary Add-on*. Details in [docs/APP.md](docs/APP.md#2-browser-extension-chrome--edge--brave--firefox).
 </details>
 
 <details>
@@ -85,18 +85,18 @@ python3 -m grabbox                      # opens the same UI in your browser
 ```
 
 `python3 -m grabbox --host 0.0.0.0` makes it reachable from every phone and tablet on
-your Wi-Fi. Windows / macOS / Linux double-click launchers (`GrabBox.bat`,
-`GrabBox.command`, `GrabBox.sh`) are in the repo root. Full guide: [APP.md](APP.md).
+your Wi-Fi. Double-click launchers for Windows / macOS / Linux are in
+[`scripts/`](scripts/). Full guide: [docs/APP.md](docs/APP.md).
 </details>
 
 <details>
 <summary><b>Terminal tools</b> — <code>ytgrab.py</code> menu and raw <code>yt-dlp</code> commands</summary>
 
-`python3 ytgrab.py` is a terminal menu that checks your setup, retries automatically when
+`python3 scripts/ytgrab.py` is a terminal menu that checks your setup, retries automatically when
 YouTube says 403, and names files cleanly. The original step-by-step `yt-dlp` guide that
 this repo started as — folder, `cmd`, the "magic command", playlists, metadata — is
-preserved in **[MANUAL.md](MANUAL.md)**, and the copy-paste cheat sheet in
-[Short Cut](Short%20Cut).
+preserved in **[docs/MANUAL.md](docs/MANUAL.md)**, and the copy-paste cheat sheet in
+[docs/CHEATSHEET.md](docs/CHEATSHEET.md).
 </details>
 
 <details>
@@ -104,7 +104,8 @@ preserved in **[MANUAL.md](MANUAL.md)**, and the copy-paste cheat sheet in
 
 * Desktop app: [desktop/README.md](desktop/README.md) (Tauri v2, Rust).
 * Android app: `android/` (Kotlin + Jetpack Compose, `gradle assembleDebug`).
-* Why it is built the way it is: [RESEARCH.md](RESEARCH.md).
+* Why it is built the way it is: [docs/RESEARCH.md](docs/RESEARCH.md).
+* Repo layout: [docs/README.md](docs/README.md).
 * Cutting a release: **Actions → release → Run workflow** → type a version such as `0.2.1`.
   CI builds every installer, stamps the version into them, and publishes a GitHub Release
   with the file names used on this page. Pushing a tag `v0.2.1` does the same.
@@ -114,7 +115,7 @@ preserved in **[MANUAL.md](MANUAL.md)**, and the copy-paste cheat sheet in
 
 * **`HTTP Error 403: Forbidden`** on YouTube almost always means the engine is outdated:
   *Settings → Update yt-dlp*, then retry. GrabBox also retries other player clients on its own.
-* Every other error, explained in plain English: **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
+* Every other error, explained in plain English: **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**.
 * Still stuck, or have an idea? Email **feedit18@gmail.com**, or use the 💬 button inside the
   app — it pre-fills everything needed to help.
 

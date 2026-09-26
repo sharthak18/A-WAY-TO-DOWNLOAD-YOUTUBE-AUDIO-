@@ -23,7 +23,7 @@ Everything runs **on your device**. Nothing is uploaded anywhere.
 ## 1a. Desktop app (recommended on computers)
 
 Download from the **[Releases page](https://github.com/sharthak18/A-WAY-TO-DOWNLOAD-YOUTUBE-AUDIO-/releases/latest)**
-— the front-page [README](README.md#download) has one-click buttons. File names
+— the front-page [README](../README.md#download) has one-click buttons. File names
 are stable, so `…/releases/latest/download/<name>` always fetches the newest build:
 
 | OS | File | Install |
@@ -49,11 +49,6 @@ footer open a feedback email to **feedit18@gmail.com**.
 
 ## 1b. The core (server + web UI)
 
-This repo already ships a working `vendor/` folder (yt-dlp 2026.08.19, the
-`bgutil` PO-token plugin, and a static ffmpeg) so it runs with **no system
-install** — it is what the live preview uses. On your own machine you can
-instead install normally:
-
 You need **Python 3**, **yt-dlp**, and (for merging/converting) **ffmpeg**.
 
 ```bash
@@ -75,10 +70,10 @@ A window opens at `http://127.0.0.1:8765`.
 
 | Platform | Launcher |
 |---|---|
-| Windows | double-click `GrabBox.bat` |
-| Linux | `./GrabBox.sh` |
-| macOS | double-click `GrabBox.command` |
-| Anywhere | `python3 -m grabbox` or `python3 launch.py` |
+| Windows | double-click `scripts\grabbox.bat` |
+| Linux | `./scripts/grabbox.sh` |
+| macOS | double-click `scripts/grabbox.command` |
+| Anywhere | `python3 -m grabbox` from the repo root |
 
 Useful flags: `--dir FOLDER`, `--port 8765`, `--host 0.0.0.0` (reach it from
 other devices on your LAN), `--watch-clipboard` (auto-pick-up copied links).
@@ -129,7 +124,8 @@ Three workflows in `.github/workflows/`:
   (artifacts under Actions, login required, 90-day expiry).
 * **build** — same idea for the Android APKs and a single-folder PyInstaller
   build per OS (`GrabBox-windows-latest`, `GrabBox-ubuntu-latest`,
-  `GrabBox-macos-latest`), handy for USB sticks. To build that one locally:
+  `GrabBox-macos-latest`), handy for USB sticks. To build that one locally
+  (from the repo root):
 
 ```bash
 pip install pyinstaller yt-dlp
@@ -186,7 +182,7 @@ Prefer running the same server-based UI in Termux instead (e.g. so a tablet or
 desktop on your Wi-Fi can reach it too)?
 
 ```bash
-bash android/termux-install.sh
+bash android/termux-install.sh     # from the repo root
 ```
 
 It installs python + ffmpeg + yt-dlp + deno, starts the server, and opens the

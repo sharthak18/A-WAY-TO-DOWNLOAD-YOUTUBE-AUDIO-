@@ -60,7 +60,7 @@ Note that `apt`/`brew` copies of yt-dlp are often months behind. If
 copy is earlier on your `PATH` and is the one being run.
 
 `ytgrab.py` does this for you: pick **u** in the menu, or run
-`python3 ytgrab.py --update`.
+`python3 scripts/ytgrab.py --update`.
 
 ### Fix 2 — install a JavaScript runtime (deno)
 
@@ -179,7 +179,7 @@ has the fix before the stable release does.
 | `WARNING: Your yt-dlp version is older than 90 days` | Stale build | `python -m pip install -U yt-dlp` |
 | File plays on PC but not on the phone | Container mismatch | Choose mp4 (1), m4a (4) or mp3 (5) — not opus/flac |
 
-`python3 ytgrab.py --doctor` checks yt-dlp, ffmpeg and the JS runtime in one
+`python3 scripts/ytgrab.py --doctor` checks yt-dlp, ffmpeg and the JS runtime in one
 go and tells you which of the above apply to you.
 
 ---

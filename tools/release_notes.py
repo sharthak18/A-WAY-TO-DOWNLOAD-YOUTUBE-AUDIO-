@@ -54,7 +54,7 @@ The app is not code-signed yet, so each OS shows a one-time warning:
   Settings → *Update yt-dlp* refreshes it in place — no reinstall.
 * Checksums: `SHA256SUMS.txt`.
 
-Problems? Read [TROUBLESHOOTING.md](https://github.com/{REPO}/blob/main/TROUBLESHOOTING.md)
+Problems? Read [TROUBLESHOOTING.md](https://github.com/{REPO}/blob/main/docs/TROUBLESHOOTING.md)
 or email **feedit18@gmail.com**.
 """)
     return 0

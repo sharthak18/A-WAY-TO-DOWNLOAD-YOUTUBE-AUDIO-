@@ -24,7 +24,7 @@ else:
     ICON = os.path.join(HERE, "extension", "icons", "icon-128.png")
 
 a = Analysis(
-    [os.path.join(HERE, "launch.py")],
+    [os.path.join(HERE, "packaging", "launch.py")],
     pathex=[HERE],
     binaries=[],
     datas=[(WEB, os.path.join("grabbox", "web"))],
