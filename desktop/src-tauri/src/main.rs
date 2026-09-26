@@ -277,9 +277,10 @@ pub fn run() {
 
             // Close button hides to the tray instead of killing downloads.
             if let Some(win) = app.get_webview_window("main") {
-                win.on_window_event(|window, event| {
+                let hide_window = win.clone();
+                win.on_window_event(move |event| {
                     if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                        let _ = window.hide();
+                        let _ = hide_window.hide();
                         api.prevent_close();
                     }
                 });

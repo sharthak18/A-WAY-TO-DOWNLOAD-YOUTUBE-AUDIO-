@@ -231,13 +231,14 @@ impl Manager {
         let url_owned = url.to_string();
         let kind_owned = kind.to_string();
 
+        let worker_state = Arc::clone(&state);
         std::thread::spawn(move || {
             manager.worker(
-                engine, state, child_slot, url_owned, kind_owned, quality, playlist,
+                engine, worker_state, child_slot, url_owned, kind_owned, quality, playlist,
                 directory, cookies, filename,
             );
         });
-        JobHandle { state: Arc::clone(&state) }
+        JobHandle { state }
     }
 
     pub fn cancel(&self, id: &str) -> bool {

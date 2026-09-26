@@ -22,7 +22,6 @@
         android:theme="@style/Theme.GrabBox"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-        android:extractNativeLibs="true"
         android:supportsRtl="true">
 
         <activity
