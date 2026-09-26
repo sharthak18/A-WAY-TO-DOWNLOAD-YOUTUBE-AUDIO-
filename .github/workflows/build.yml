@@ -58,9 +58,30 @@ jobs:
       # keeps each download small; pick arm64-v8a unless the phone is very old.
       # Debug build on purpose: it ships pre-signed with the debug key so it
       # installs with zero friction until release signing is wired up.
+      #
+      # The log is captured and re-emitted as workflow annotations: the raw
+      # step log is truncated in the web UI and needs a signed-in session, so
+      # a failing build would otherwise be unreadable from a PR comment.
       - name: Build APKs (per-ABI)
         working-directory: android
-        run: gradle assembleDebug --no-daemon
+        run: |
+          gradle assembleDebug --no-daemon --stacktrace > /tmp/gradle.log 2>&1 || status=$?
+          status=${status:-0}
+          tail -c 40000 /tmp/gradle.log >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "### `gradle assembleDebug` exited $status"
+            echo '```'
+            grep -nE "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|^> |AAPT|Execution failed|Unresolved reference|Cannot find" \
+              /tmp/gradle.log | head -40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          grep -E "^e: |error:|FAILURE:|What went wrong|Caused by:|^\* Try:|^> |Execution failed|Unresolved reference|Cannot find" \
+            /tmp/gradle.log | head -25 \
+            | sed -e 's/%/%25/g' -e 's/\r/%0D/g' \
+            | while IFS= read -r line; do
+                echo "::error title=Android build::${line}"
+              done
+          exit $status
 
       - uses: actions/upload-artifact@v7
         with:
