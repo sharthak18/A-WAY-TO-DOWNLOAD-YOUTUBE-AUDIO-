@@ -202,18 +202,27 @@ fun HomeScreen(
 }
 
 @Composable
-private fun BannerCard(title: String, body: String, hint: String? = null) {
+private fun BannerCard(
+    title: String,
+    body: String,
+    hint: String? = null,
+    containerColor: Color = MaterialTheme.colorScheme.errorContainer,
+    contentColor: Color = MaterialTheme.colorScheme.onErrorContainer,
+    action: (@Composable () -> Unit)? = null,
+) {
     Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
+        color = containerColor,
+        contentColor = contentColor,
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(title, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onErrorContainer)
-            Text(body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onErrorContainer)
+            Text(title, fontWeight = FontWeight.SemiBold, color = contentColor)
+            Text(body, style = MaterialTheme.typography.bodySmall, color = contentColor)
             hint?.let {
                 Text("💡 $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
             }
+            action?.invoke()
         }
     }
 }
